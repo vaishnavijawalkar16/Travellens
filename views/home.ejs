@@ -25,10 +25,16 @@
   <main class="home-container">
     <h3>Welcome Back, <span id="user-display">Traveler</span>!</h3>
 
-    <button class="snap-btn" onclick="alert('Camera/upload feature coming soon!')">
-      📸 Tap to snap<br>
-      <small>or upload from gallery</small>
-    </button>
+        <!-- ADD THIS: a simple form to upload or take a picture -->
+    <section class="image-upload">
+      <h3>Identify a landmark</h3>
+      <form id="image-upload-form" action="/get-embedding" method="POST" enctype="multipart/form-data">
+        <input type="file" name="image" id="image-input" accept="image/*" required />
+        <button type="submit">Send to CLIP</button>
+      </form>
+      <p id="upload-note">Choose an image and click "Send to CLIP" — the server will return an embedding.</p>
+    </section>
+
 
     <div class="nearby">You are near <b>Gateway of India</b></div>
 
