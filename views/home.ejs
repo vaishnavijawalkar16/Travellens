@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Lens - Home</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- JS -->
+  <script src="/js/script.js" defer></script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="home-header">
+    <img src="/images/logo1.png" alt="Travel Lens Logo" class="logo-small">
+    <h2>Travel Lens</h2>
+    <i class="fa-solid fa-bell notif"></i>
+  </header>
+
+  <!-- Main Content -->
+  <main class="home-container">
+    <h3>Welcome Back, <span id="user-display">Traveler</span>!</h3>
+
+    <button class="snap-btn" onclick="alert('Camera/upload feature coming soon!')">
+      📸 Tap to snap<br>
+      <small>or upload from gallery</small>
+    </button>
+
+    <div class="nearby">You are near <b>Gateway of India</b></div>
+
+    <h3>Recent Searches</h3>
+    <div class="cards">
+      <div class="card" onclick="window.location.href='/details?place=TajMahal'">
+        <img src="#" alt="Taj Mahal">
+        <h4>Taj Mahal</h4>
+        <p>Agra, Uttar Pradesh<br><small>15 mins ago</small></p>
+      </div>
+
+      <div class="card" onclick="window.location.href='/details?place=AgraFort'">
+        <img src="#" alt="Agra Fort">
+        <h4>Agra Fort</h4>
+        <p>Agra, Uttar Pradesh<br><small>2 hrs ago</small></p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <i class="fa-solid fa-house" onclick="window.location.href='/home'"></i>
+    <i class="fa-solid fa-heart"></i>
+    <i class="fa-solid fa-user" onclick="logoutUser()"></i>
+  </nav>
+
+</body>
+</html>

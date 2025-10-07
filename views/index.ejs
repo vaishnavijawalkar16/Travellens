@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Lens</title>
+  <script src="/js/script.js" defer></script>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f9f7f4;
+      flex-direction: column;
+    }
+
+    .logo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .logo img {
+      width: 50%;
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 1rem;
+      color: #555;
+    }
+  </style>
+</head>
+<script>
+  // Wait 3 seconds, then redirect to signup
+  setTimeout(() => {
+    window.location.href = "/signup";
+  }, 3000);
+</script>
+<body>
+  <div class="logo">
+    <img src="/images/logo1.png" alt="Travel Lens Logo">
+    <h1>Welcome to Travel Lens &#10084; </h1>
+  </div>
+</body>
+</html>

@@ -1,0 +1,401 @@
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #f8f8f4;
+  color: #214b4b;
+}
+
+/* ---------- AUTH PAGES ---------- */
+.heading{
+  display:flex;
+  align-items: center;
+  justify-self: center;
+  gap:10px;
+}
+.auth-container {
+  text-align: center;
+  padding: 30px;
+}
+.auth-card{
+  border-radius: 8%;
+  padding: 30px 0px 30px 0px;
+  border:1px solid #163333;
+  box-shadow: 0 0 150px rgba(0,0,0,0.15);
+}
+.logo {
+  width: 90px;
+}
+
+.title {
+  font-family: 'Pacifico', cursive;
+  font-size: 28px;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.illustration {
+  width: 250px;
+  margin: 0 ;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.auth-form input {
+  width: 70%;
+  padding: 12px;
+  margin: 12px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+.auth-form button {
+  width: 75%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #214b4b;
+  color: white;
+  font-size: 16px;
+  margin: 12px 0;
+  cursor: pointer;
+}
+
+.auth-form button:hover {
+  background: #163333;
+}
+
+.switch {
+  margin: 8px 0;
+  color: #888;
+}
+
+.switch-btn {
+  text-decoration: none;
+  background: #2c6b68;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+}
+
+.tagline {
+  margin-top: 30px;
+  font-size: larger;
+  font-weight: bold;
+  color: #214b4b;
+}
+
+/* keep everything stacked on mobile */
+.auth-container > * {
+  margin-bottom: 20px;
+}
+
+/* ----- Desktop / Laptop layout ----- */
+@media (min-width: 750px) {
+  .auth-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;   /* left = form, right = info */
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "auth heading"
+      "auth illustration"
+      "auth tagline";
+    column-gap: 48px;
+    align-items: center;
+    max-width: 1100px;                
+    margin: 0 auto;                   
+    text-align: left;                 
+  }
+
+  /* Place items into the grid areas */
+  .auth-card { 
+    grid-area: auth; 
+    justify-self: end;
+    width: 100%;
+    max-width: 420px;                
+  }
+
+  .heading { 
+    grid-area: heading; 
+    justify-self:start;
+  }
+
+  .illustration { 
+    grid-area: illustration; 
+    justify-self: start;
+    width: 360px;                    
+    max-width: 100%;
+    margin: 20px 0;
+  }
+
+  .tagline { 
+    grid-area: tagline; 
+    justify-self: start;
+    margin-left: 50px;
+    margin-top: 10px;
+    font-size: 22px;               
+  }
+}
+/* ---------- HOME PAGE ---------- */
+.home-header {
+  box-shadow: 0 0 150px rgba(0,0,0,0.15);
+  color:#163333;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 15px;
+}
+
+.logo-small {
+  width: 50px;
+}
+
+.notif {
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.home-container {
+  padding: 15px;
+  text-align: center;
+}
+
+.snap-btn {
+  background: #214b4b;
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 18px;
+  margin: 15px 0;
+  width: 100%;
+}
+
+.nearby {
+  background: #eaf6f6;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 6px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: left;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  cursor: pointer;
+}
+
+.card img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+/* ---------- DETAILS PAGE ---------- */
+.details-header {
+  padding: 10px;
+}
+
+.details-header i {
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.details-img {
+  width: 100%;
+  border-radius: 0 0 20px 20px;
+}
+
+.details-container {
+  padding: 15px;
+}
+
+.location {
+  font-size: 14px;
+  color: gray;
+}
+
+.description {
+  margin: 12px 0;
+}
+
+.details-actions {
+  display: flex;
+  justify-content: space-around;
+  margin: 15px 0;
+}
+
+.details-actions button {
+  background: #4caf91;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.nearby-card {
+  background: #f0f0f0;
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.nearby-card img {
+  width: 80px;
+  margin-right: 10px;
+  border-radius: 6px;
+}
+
+/* ---------- NAVIGATION ---------- */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #214b4b;
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 0;
+}
+
+.bottom-nav i {
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* ---------- ACCOUNT PAGE DISPLAY ---------- */
+.account-container {
+    max-width: 500px;
+    margin: 50px auto;
+    background: #f8f8f4;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 0 150px rgba(0,0,0,0.15);
+    color: #214b4b;
+    font-family: 'Poppins', sans-serif;
+}
+
+.account-container .title {
+    text-align: center;
+    font-size: 28px;
+    font-family: 'Pacifico', cursive;
+    margin-bottom: 25px;
+    color: #214b4b;
+}
+
+.account-info {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(33,75,75,0.05);
+}
+
+.info-label {
+    font-weight: 600;
+    color: #163333;
+}
+
+.info-value {
+    color: #214b4b;
+}
+
+.edit-btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    background: #214b4b;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.edit-btn:hover {
+    background: #163333;
+}
+
+.logout-button {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.logout-button button {
+    background: none;
+    color: #EF4444;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+}
+
+.logout-button button:hover {
+    color: #B91C1C;
+}
+.logout-link {
+    color: #EF4444;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.logout-link:hover {
+    color: #B91C1C;
+}
+
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+    .account-container {
+        margin: 30px 20px;
+        padding: 25px;
+    }
+
+    .account-container .title {
+        font-size: 24px;
+    }
+
+    .info-row {
+        flex-direction: column;
+        gap: 5px;
+        padding: 8px 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .account-container {
+        margin: 20px 15px;
+        padding: 20px;
+    }
+
+    .account-container .title {
+        font-size: 22px;
+    }
+
+    .edit-btn {
+        font-size: 14px;
+        padding: 10px;
+    }
+}
+
