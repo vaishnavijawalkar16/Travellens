@@ -16,10 +16,10 @@
     <img src="/images/logo1.png" alt="Traveler Illustration" class="illustration">
 
     <div class="auth-card">
-      <form class="auth-form">
-        <input type="text" placeholder="Name" id="login-name" required>
-        <input type="password" placeholder="Password" id="login-password" required>
-        <button type="button" onclick="loginUser()">Log in</button>
+      <form class="auth-form" action="/auth/login" method="POST">
+        <input type="text" name="email" placeholder="Name" id="login-name" required>
+        <input type="password" name="password" placeholder="Password" id="login-password" required>
+        <button type="submit">Log in</button>
 
         <p class="switch">or</p>
         <a href="/signup" class="switch-btn">Sign Up</a>

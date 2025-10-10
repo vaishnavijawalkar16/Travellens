@@ -4,13 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Travel Lens - Home</title>
-  
+
   <!-- CSS -->
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <!-- JS -->
   <script src="/js/script.js" defer></script>
+
+  <style>
+    /* Optional small styling to hide file input */
+    #image-input {
+      display: none;
+    }
+  </style>
 </head>
 <body>
 
@@ -23,43 +30,60 @@
 
   <!-- Main Content -->
   <main class="home-container">
-    <h3>Welcome Back, <span id="user-display">Traveler</span>!</h3>
+    <h3>Welcome Back, <span id="user-display"><%= userName || "Traveler" %></span>!</h3>
 
-        <!-- ADD THIS: a simple form to upload or take a picture -->
-    <section class="image-upload">
-      <h3>Identify a landmark</h3>
-      <form id="image-upload-form" action="/get-embedding" method="POST" enctype="multipart/form-data">
-        <input type="file" name="image" id="image-input" accept="image/*" required />
-        <button type="submit">Send to CLIP</button>
-      </form>
-      <p id="upload-note">Choose an image and click "Send to CLIP" — the server will return an embedding.</p>
-    </section>
+    <!-- Upload Form -->
+    <form id="uploadForm" action="/user/search" method="POST" enctype="multipart/form-data">
+      <input type="file" name="image" id="image-input" accept="image/*" required capture="environment">
 
+      <!-- The clickable button (camera/upload) -->
+      <button type="button" class="snap-btn" id="upload-btn">
+        📸 Tap to snap<br>
+        <small>or upload from gallery</small>
+      </button>
+    </form>
 
-    <div class="nearby">You are near <b>Gateway of India</b></div>
+    <!-- Optional Nearby info (can be dynamic later) -->
+    <div class="nearby">You are near <b><%= nearbyLandmark || "Gateway of India" %></b></div>
 
+    <!-- Recent Searches (dynamic) -->
     <h3>Recent Searches</h3>
     <div class="cards">
-      <div class="card" onclick="window.location.href='/details?place=TajMahal'">
-        <img src="#" alt="Taj Mahal">
-        <h4>Taj Mahal</h4>
-        <p>Agra, Uttar Pradesh<br><small>15 mins ago</small></p>
-      </div>
-
-      <div class="card" onclick="window.location.href='/details?place=AgraFort'">
-        <img src="#" alt="Agra Fort">
-        <h4>Agra Fort</h4>
-        <p>Agra, Uttar Pradesh<br><small>2 hrs ago</small></p>
-      </div>
+      <% if (recentSearches && recentSearches.length > 0) { %>
+        <% recentSearches.forEach(search => { %>
+          <div class="card" onclick="window.location.href='/details?place=<%= encodeURIComponent(search.landmarkName) %>'">
+            <img src="<%= search.imageURL || '/images/logo1.png' %>" alt="<%= search.landmarkName %>">
+            <h4><%= search.landmarkName %></h4>
+            <p><%= search.location || '' %><br><small><%= search.timeAgo || '' %></small></p>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p style="text-align:center; color:gray;">No recent searches yet.</p>
+      <% } %>
     </div>
   </main>
 
   <!-- Bottom Navigation -->
   <nav class="bottom-nav">
     <i class="fa-solid fa-house" onclick="window.location.href='/home'"></i>
-    <i class="fa-solid fa-heart"></i>
+    <i class="fa-solid fa-heart" onclick="window.location.href='/user/bookmarks'"></i>
     <i class="fa-solid fa-user" onclick="logoutUser()"></i>
   </nav>
+
+  <!-- Inline JS for upload behavior -->
+  <script>
+    document.getElementById('upload-btn').addEventListener('click', function() {
+      // Simulate clicking the hidden file input
+      document.getElementById('image-input').click();
+    });
+
+    document.getElementById('image-input').addEventListener('change', function() {
+      if (this.files.length > 0) {
+        // Automatically submit the form once an image is chosen
+        document.getElementById('uploadForm').submit();
+      }
+    });
+  </script>
 
 </body>
 </html>

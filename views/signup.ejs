@@ -15,12 +15,12 @@
     </div>
     <img src="images/signup.png" alt="Traveler Illustration" class="illustration">
 
-    <div class="auth-card">
-    <form class="auth-form">
-      <input type="text" placeholder="Name" id="signup-name" required>
-      <input type="email" placeholder="Email" id="signup-email" required>
-      <input type="password" placeholder="Password" id="signup-password" required>
-      <button type="button" onclick="signupUser()">Sign Up</button>
+    <div class="auth-card" >
+    <form class="auth-form" action="/auth/signup" method="POST">
+      <input type="text" name="username" placeholder="Name" id="signup-name" required>
+      <input type="email" name="email" placeholder="Email" id="signup-email" required>
+      <input type="password" name="password" placeholder="Password" id="signup-password" required>
+      <button type="submit">Sign Up</button>
 
       <p class="switch">or</p>
       <a href="/login" class="switch-btn">Log in</a>
