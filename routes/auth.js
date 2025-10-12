@@ -41,9 +41,12 @@ router.post("/login", async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).send("Invalid credentials");
 
-    // Store session
+    // ✅ Store session info
     req.session.userId = user._id;
-    res.render("home");
+    req.session.username = user.username; // <--- ADD THIS LINE
+
+    // ✅ Render home with username + empty searches
+    res.render("home", { userName: user.username, recentSearches: [] });
   } catch (error) {
     console.error(error);
     res.status(500).send("❌ Error logging in");

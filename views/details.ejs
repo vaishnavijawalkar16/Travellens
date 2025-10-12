@@ -9,38 +9,48 @@
 </head>
 <body>
 
+  <!-- Header -->
   <header class="details-header">
     <i class="fa-solid fa-arrow-left" onclick="window.history.back()"></i>
   </header>
 
+  <!-- Main Content -->
   <main class="details-container">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Hawa_Mahal_2011.jpg/800px-Hawa_Mahal_2011.jpg" alt="Hawa Mahal" class="details-img">
+    <img src="<%= imageUrl || 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/No_image_available.svg/600px-No_image_available.svg.png' %>" 
+         alt="<%= landmarkName || 'Landmark Image' %>" class="details-img">
     
-    <h2>Hawa Mahal</h2>
-    <p class="location"><i class="fa-solid fa-location-dot"></i> Jaipur, Rajasthan, India</p>
+    <h2>
+      <% if (wikipediaLink) { %>
+          <a href="<%= wikipediaLink %>" target="_blank" rel="noopener noreferrer"><%= landmarkName || 'Unknown Landmark' %></a>
+      <% } else { %>
+          <%= landmarkName || 'Unknown Landmark' %>
+      <% } %>
+    </h2>
     
     <p class="description">
-      The Hawa Mahal is a palace in the city of Jaipur, Rajasthan, India. 
-      Built from red and pink sandstone, it is on the edge of the City Palace, Jaipur, 
-      and extends to the Zenana, or women’s chambers.
+      <%= description || 'No description available for this landmark.' %>
     </p>
 
     <div class="details-actions">
-      <button>Bookmark</button>
-      <button>Share</button>
-    </div>
+      <form action="/user/bookmark" method="POST">
+        <input type="hidden" name="landmarkName" value="<%= landmarkName %>">
+        <input type="hidden" name="imageUrl" value="<%= imageUrl %>">
+        <input type="hidden" name="wikipediaLink" value="<%= wikipediaLink %>">
+        <button type="submit">Bookmark</button>
+      </form>
 
-    <div class="nearby-card">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/d/d2/Jaipur_City_Palace.jpg" alt="City Palace">
-      <p><b>City Palace</b> is just 650m away</p>
+      <button onclick="navigator.share && navigator.share({ title: '<%= landmarkName %>', url: window.location.href })">
+        Share
+      </button>
     </div>
   </main>
 
+  <!-- Bottom Navigation -->
   <nav class="bottom-nav">
-    <i class="fa-solid fa-house" onclick="window.location.href='home.html'"></i>
+    <i class="fa-solid fa-house" onclick="window.location.href='/home'"></i>
     <i class="fa-solid fa-location-dot"></i>
-    <i class="fa-solid fa-heart"></i>
-    <i class="fa-solid fa-user" onclick="window.location.href='login.html'"></i>
+    <i class="fa-solid fa-heart" onclick="window.location.href='/user/bookmarks'"></i>
+    <i class="fa-solid fa-user" onclick="window.location.href='/account'"></i>
   </nav>
 
 </body>

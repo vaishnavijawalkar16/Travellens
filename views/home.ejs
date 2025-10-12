@@ -30,23 +30,20 @@
 
   <!-- Main Content -->
   <main class="home-container">
-    <h3>Welcome Back, <span id="user-display"><%= userName || "Traveler" %></span>!</h3>
+    <h3>Welcome Back, <span id="user-display"><%= typeof userName !== 'undefined' ? userName : "Traveler" %></span>!</h3>
 
-    <!-- Upload Form -->
-    <form id="uploadForm" action="/user/search" method="POST" enctype="multipart/form-data">
+    <!-- ✅ Upload Form -->
+    <form id="uploadForm" action="/search/image" method="POST" enctype="multipart/form-data">
       <input type="file" name="image" id="image-input" accept="image/*" required capture="environment">
 
-      <!-- The clickable button (camera/upload) -->
+      <!-- The clickable camera/upload button -->
       <button type="button" class="snap-btn" id="upload-btn">
         📸 Tap to snap<br>
         <small>or upload from gallery</small>
       </button>
     </form>
 
-    <!-- Optional Nearby info (can be dynamic later) -->
-    <div class="nearby">You are near <b><%= nearbyLandmark || "Gateway of India" %></b></div>
-
-    <!-- Recent Searches (dynamic) -->
+    <!-- Recent Searches -->
     <h3>Recent Searches</h3>
     <div class="cards">
       <% if (recentSearches && recentSearches.length > 0) { %>
@@ -73,13 +70,11 @@
   <!-- Inline JS for upload behavior -->
   <script>
     document.getElementById('upload-btn').addEventListener('click', function() {
-      // Simulate clicking the hidden file input
       document.getElementById('image-input').click();
     });
 
     document.getElementById('image-input').addEventListener('change', function() {
       if (this.files.length > 0) {
-        // Automatically submit the form once an image is chosen
         document.getElementById('uploadForm').submit();
       }
     });
