@@ -392,3 +392,117 @@ body {
     }
 }
 
+/* ---------- BOOKMARKS PAGE ---------- */
+.bookmarks-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 20px;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+    color: #214b4b;
+}
+
+.page-title {
+    font-size: 28px;
+    font-family: 'Pacifico', cursive;
+    margin-bottom: 25px;
+    color: #214b4b;
+}
+
+.no-bookmarks {
+    font-size: 18px;
+    margin: 20px 0;
+    color: #555;
+}
+
+.btn-primary {
+    display: inline-block;
+    background: #214b4b;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+.btn-primary:hover {
+    background: #163333;
+}
+
+/* --- Grid Layout --- */
+.bookmark-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* --- Individual Bookmark Card --- */
+.bookmark-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(33,75,75,0.1);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.bookmark-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(33,75,75,0.15);
+}
+
+.bookmark-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.bookmark-info {
+    padding: 15px;
+    text-align: left;
+}
+
+.bookmark-info h3 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    color: #214b4b;
+}
+
+.wiki-link {
+    display: inline-block;
+    color: #2c6b68;
+    text-decoration: none;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.wiki-link:hover {
+    text-decoration: underline;
+}
+
+.delete-btn {
+    background: #ef4444;
+    border: none;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.delete-btn:hover {
+    background: #b91c1c;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 24px;
+    }
+
+    .bookmark-card img {
+        height: 150px;
+    }
+}

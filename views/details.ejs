@@ -1,56 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Travel Lens - Details</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Travel Lens - <%= landmarkName %></title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-
-  <!-- Header -->
   <header class="details-header">
-    <i class="fa-solid fa-arrow-left" onclick="window.history.back()"></i>
+    <i class="fa-solid fa-arrow-left" onclick="history.back()"></i>
   </header>
 
-  <!-- Main Content -->
   <main class="details-container">
-    <img src="<%= imageUrl || 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/No_image_available.svg/600px-No_image_available.svg.png' %>" 
-         alt="<%= landmarkName || 'Landmark Image' %>" class="details-img">
-    
+    <img class="details-img" src="<%= imageUrl || '/images/default-landmark.jpg' %>" alt="<%= landmarkName %>">
     <h2>
       <% if (wikipediaLink) { %>
-          <a href="<%= wikipediaLink %>" target="_blank" rel="noopener noreferrer"><%= landmarkName || 'Unknown Landmark' %></a>
+        <a href="<%= wikipediaLink %>" target="_blank" rel="noopener"><%= landmarkName %></a>
       <% } else { %>
-          <%= landmarkName || 'Unknown Landmark' %>
+        <%= landmarkName %>
       <% } %>
     </h2>
-    
-    <p class="description">
-      <%= description || 'No description available for this landmark.' %>
-    </p>
+
+    <p class="description"><%= description || "No description available." %></p>
+    <p class="location">📍 <%= location || "Unknown location" %></p>
 
     <div class="details-actions">
-      <form action="/user/bookmark" method="POST">
+      <form action="/user/bookmark" method="POST" class="bookmark-form">
         <input type="hidden" name="landmarkName" value="<%= landmarkName %>">
         <input type="hidden" name="imageUrl" value="<%= imageUrl %>">
-        <input type="hidden" name="wikipediaLink" value="<%= wikipediaLink %>">
-        <button type="submit">Bookmark</button>
+        <input type="hidden" name="wikiLink" value="<%= wikipediaLink %>">
+        <input type="hidden" name="location" value="<%= location %>">
+        <input type="hidden" name="description" value="<%= description %>">
+        <button type="submit" class="btn-bookmark"><i class="fa-solid fa-bookmark"></i> Bookmark</button>
       </form>
 
-      <button onclick="navigator.share && navigator.share({ title: '<%= landmarkName %>', url: window.location.href })">
-        Share
+      <button class="btn-share" onclick="navigator.share && navigator.share({ title: '<%= landmarkName %>', url: window.location.href })">
+        <i class="fa-solid fa-share-nodes"></i> Share
       </button>
     </div>
   </main>
 
-  <!-- Bottom Navigation -->
   <nav class="bottom-nav">
-    <i class="fa-solid fa-house" onclick="window.location.href='/home'"></i>
-    <i class="fa-solid fa-heart" onclick="window.location.href='/user/bookmarks'"></i>
-    <i class="fa-solid fa-user" onclick="window.location.href='/account'"></i>
+    <i class="fa-solid fa-house" onclick="location.href='/home'"></i>
+    <i class="fa-solid fa-heart" onclick="location.href='/user/bookmarks'"></i>
+    <i class="fa-solid fa-user" onclick="location.href='/account'"></i>
   </nav>
-
 </body>
 </html>

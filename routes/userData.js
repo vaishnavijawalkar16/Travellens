@@ -1,71 +1,79 @@
-// routes/userData.js
 const express = require("express");
 const router = express.Router();
 const RecentSearch = require("../models/RecentSearch");
+const Bookmark = require("../models/Bookmark");
+const User = require("../models/User");
 
-/**
- * Simple isLoggedIn middleware (API-friendly)
- */
+/* middleware */
 function isLoggedIn(req, res, next) {
-  try {
-    if (req.session && req.session.userId) return next();
-
-    const acceptsJson =
-      req.xhr ||
-      (req.headers["accept"] && req.headers["accept"].includes("application/json")) ||
-      req.headers["content-type"] === "application/json";
-
-    if (acceptsJson) return res.status(401).json({ error: "not_authenticated" });
-    return res.redirect("/login");
-  } catch (e) {
-    console.error("isLoggedIn middleware error:", e);
-    return res.status(500).json({ error: "auth_middleware_error" });
-  }
+  if (req.session && req.session.userId) return next();
+  return res.redirect("/login");
 }
 
-/**
- * POST /user/add-recent
- * Allows adding a recent search (accepts different key spellings)
- */
-router.post("/add-recent", isLoggedIn, async (req, res) => {
+/* ✅ POST /user/bookmark - prevents duplicate bookmarks */
+router.post("/bookmark", isLoggedIn, async (req, res) => {
   try {
-    const payload = (req.body && Object.keys(req.body).length) ? req.body
-      : (Object.keys(req.query).length ? req.query : (req.params || {}));
-    const data = (payload.data && typeof payload.data === "object") ? payload.data : payload;
+    const { landmarkName, imageUrl, location, wikiLink, description } = req.body || {};
+    if (!landmarkName) return res.status(400).send("missing_landmarkName");
 
-    const landmarkName = data.landmarkName || data.landmark_name || data.name || null;
-    const wikiLink = data.wikiLink || data.wikipedialink || data.wiki_link || null;
-    const score = data.score !== undefined ? Number(data.score) : null;
-
-    if (!landmarkName) return res.status(400).json({ error: "missing_landmarkName" });
-
-    const doc = new RecentSearch({
-      userId: req.session.userId || null,
-      landmarkName,
-      wikiLink,
-      score
+    // 🧠 check if bookmark already exists for this user and same landmark
+    const existing = await Bookmark.findOne({
+      user: req.session.userId,
+      landmarkName: { $regex: new RegExp(`^${landmarkName}$`, "i") } // case-insensitive match
     });
-    await doc.save();
 
-    return res.status(200).json({ ok: true, saved: doc });
+    if (existing) {
+      console.log("⚠️ Duplicate bookmark prevented:", landmarkName);
+      // You can flash a message or just redirect silently
+      return res.redirect("/user/bookmarks");
+    }
+
+    // create new bookmark only if not already saved
+    const bookmark = new Bookmark({
+      user: req.session.userId,
+      landmarkName,
+      imageUrl: imageUrl || "",
+      location: location || "",
+      wikiLink: wikiLink || "",
+      description: description || ""
+    });
+
+    const saved = await bookmark.save();
+    await User.findByIdAndUpdate(req.session.userId, { $push: { bookmarks: saved._id } });
+
+    return res.redirect("/user/bookmarks");
   } catch (err) {
-    console.error("❌ Error in /add-recent:", err);
-    return res.status(500).json({ error: "server_error", details: err.message });
+    console.error("Error saving bookmark:", err);
+    return res.status(500).send("Failed to save bookmark");
   }
 });
 
-/**
- * GET /user/recent
- * Returns last N recent searches for the logged-in user
- */
-router.get("/recent", isLoggedIn, async (req, res) => {
+/* GET /user/bookmarks */
+router.get("/bookmarks", isLoggedIn, async (req, res) => {
   try {
-    const userId = req.session.userId;
-    const recent = await RecentSearch.find({ userId }).sort({ createdAt: -1 }).limit(10);
-    return res.status(200).json({ ok: true, recent });
+    const bookmarks = await Bookmark.find({ user: req.session.userId }).sort({ createdAt: -1 }).lean();
+    return res.render("bookmarks", { bookmarks });
   } catch (err) {
-    console.error("❌ Error fetching recent:", err);
-    return res.status(500).json({ error: "server_error" });
+    console.error("Error fetching bookmarks:", err);
+    return res.status(500).send("Failed to load bookmarks");
+  }
+});
+
+/* DELETE /user/bookmark/delete/:id */
+router.post("/bookmark/delete/:id", isLoggedIn, async (req, res) => {
+  try {
+    const bookmarkId = req.params.id;
+    const deleted = await Bookmark.findOneAndDelete({ _id: bookmarkId, user: req.session.userId });
+    if (deleted) {
+      await User.findByIdAndUpdate(req.session.userId, { $pull: { bookmarks: bookmarkId } });
+      console.log("✅ Bookmark deleted:", bookmarkId);
+    } else {
+      console.warn("⚠️ Bookmark not found or unauthorized:", bookmarkId);
+    }
+    return res.redirect("/user/bookmarks");
+  } catch (err) {
+    console.error("Error deleting bookmark:", err);
+    return res.status(500).send("Failed to delete bookmark");
   }
 });
 

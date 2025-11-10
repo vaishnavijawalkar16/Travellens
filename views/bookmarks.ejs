@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Your Bookmarks</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .remove-btn {
+      background: #ff4d4d;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-top: 8px;
+    }
+    .remove-btn:hover {
+      background: #e60000;
+    }
+    .card {
+      position: relative;
+      transition: 0.3s;
+    }
+    .card:hover {
+      transform: scale(1.03);
+    }
+  </style>
+</head>
+<body>
+  <header class="home-header">
+    <img src="/images/logo1.png" class="logo-small" alt="logo">
+    <h2>Bookmarks</h2>
+    <i class="fa-solid fa-user" onclick="location.href='/account'"></i>
+  </header>
+
+  <main class="home-container">
+    <% if (!bookmarks || bookmarks.length === 0) { %>
+      <p class="no-bookmarks">No bookmarks yet. Save landmarks from the details page.</p>
+    <% } else { %>
+      <div class="cards">
+        <% bookmarks.forEach(b => { %>
+          <div class="card">
+            <img src="<%= b.imageUrl || '/images/default-landmark.jpg' %>" alt="<%= b.landmarkName %>" onclick="location.href='/details/<%= b._id %>'">
+            <h4><%= b.landmarkName %></h4>
+            <p><%= b.location || 'Unknown location' %><br><small><%= new Date(b.createdAt).toLocaleString() %></small></p>
+
+            <!-- Delete button -->
+            <form action="/user/bookmark/delete/<%= b._id %>" method="POST" onsubmit="return confirm('Remove this bookmark?')">
+              <button type="submit" class="remove-btn"><i class="fa-solid fa-trash"></i> Remove</button>
+            </form>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </main>
+
+  <nav class="bottom-nav">
+    <i class="fa-solid fa-house" onclick="location.href='/home'"></i>
+    <i class="fa-solid fa-heart" onclick="location.href='/user/bookmarks'"></i>
+    <i class="fa-solid fa-user" onclick="location.href='/account'"></i>
+  </nav>
+</body>
+</html>
