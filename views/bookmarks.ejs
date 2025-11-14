@@ -33,7 +33,7 @@
   <header class="home-header">
     <img src="/images/logo1.png" class="logo-small" alt="logo">
     <h2>Bookmarks</h2>
-    <i class="fa-solid fa-user" onclick="location.href='/account'"></i>
+    <i class="#"></i>
   </header>
 
   <main class="home-container">
@@ -45,7 +45,7 @@
           <div class="card">
             <img src="<%= b.imageUrl || '/images/default-landmark.jpg' %>" alt="<%= b.landmarkName %>" onclick="location.href='/details/<%= b._id %>'">
             <h4><%= b.landmarkName %></h4>
-            <p><%= b.location || 'Unknown location' %><br><small><%= new Date(b.createdAt).toLocaleString() %></small></p>
+            <p><small><%= new Date(b.createdAt).toLocaleString() %></small></p>
 
             <!-- Delete button -->
             <form action="/user/bookmark/delete/<%= b._id %>" method="POST" onsubmit="return confirm('Remove this bookmark?')">

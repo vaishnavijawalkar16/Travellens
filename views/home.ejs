@@ -11,7 +11,7 @@
   <header class="home-header">
     <img src="/images/logo1.png" class="logo-small" alt="logo">
     <h2 class="title">Travel Lens</h2>
-    <i class="fa-solid fa-bell notif"></i>
+    <i class="#"></i>
   </header>
 
   <main class="home-container">
@@ -29,7 +29,7 @@
           <div class="card" onclick="location.href='/details/<%= search._id %>'">
             <img src="<%= search.imageUrl || '/images/default-landmark.jpg' %>" alt="<%= search.landmarkName %>">
             <h4><%= search.landmarkName %></h4>
-            <p><%= search.location || 'Unknown location' %><br><small><%= new Date(search.createdAt).toLocaleString() %></small></p>
+            <p><small><%= new Date(search.createdAt).toLocaleString() %></small></p>
           </div>
         <% }) %>
       <% } else { %>

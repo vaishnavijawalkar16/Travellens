@@ -6,44 +6,103 @@
     <title>TravelLens - Account</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
+
 <body>
 
-    <div class="account-container auth-card">
+    <div class="account-container">
         <h1 class="title">Your Profile</h1>
 
         <div class="account-info">
             <div class="info-row">
-                <span class="info-label">Username:</span>
-                <span class="info-value" id="username">JohnDoe</span>
+                <span class="info-label">Username</span>
+                <span class="info-value"><%= user.username %></span>
             </div>
+
             <div class="info-row">
-                <span class="info-label">Email:</span>
-                <span class="info-value" id="email">john@example.com</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Gender:</span>
-                <span class="info-value" id="gender">Male</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Age:</span>
-                <span class="info-value" id="age">28</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Location:</span>
-                <span class="info-value" id="location">New York, USA</span>
+                <span class="info-label">Email</span>
+                <span class="info-value"><%= user.email %></span>
             </div>
         </div>
 
-        <!-- Optional Edit Button -->
         <div style="text-align:center; margin-top: 20px;">
-            <button class="edit-btn">Edit Profile</button>
+            <button class="edit-btn" onclick="openModal()">Edit Profile</button>
         </div>
 
-        <!-- Logout -->
         <div class="logout-button">
-            <a href="/" class="logout-link">Logout</a>
+            <a href="/auth/logout" class="logout-link">Logout</a>
+        </div>
+
+        <div style="margin-top: 20px; text-align:center;">
+            <button class="delete-btn" onclick="openDeleteModal()">Delete Account</button>
         </div>
     </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal-bg" id="modalBg">
+        <div class="modal">
+            <span class="close-btn" onclick="closeModal()">×</span>
+
+            <h2 class="modal-title">Edit Profile</h2>
+
+            <form action="/auth/update-profile" method="POST">
+                
+                <div class="edit-field">
+                    <label>Username</label>
+                    <input type="text" name="username" value="<%= user.username %>" required>
+                </div>
+
+                <div class="edit-field">
+                    <label>Email (cannot be changed)</label>
+                    <input type="text" value="<%= user.email %>" disabled>
+                </div>
+
+                <div class="edit-field">
+                    <label>New Password (optional)</label>
+                    <input type="password" name="password" placeholder="Enter new password">
+                </div>
+
+                <button type="submit" class="edit-submit">Save Changes</button>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-bg" id="deleteModal">
+        <div class="modal">
+            <span class="close-btn" onclick="closeDeleteModal()">×</span>
+
+            <h2 class="modal-title" style="color: red;">Confirm Delete</h2>
+
+            <p style="text-align:center; margin-bottom: 20px;">
+                This action will <b>permanently delete your account</b> and all saved data.
+            </p>
+
+            <form action="/auth/delete-account" method="POST">
+                <button type="submit" class="delete-submit">Yes, Delete My Account</button>
+            </form>
+
+            <button onclick="closeDeleteModal()" class="edit-submit" style="margin-top:10px;">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById("modalBg").style.display = "flex";
+        }
+        function closeModal() {
+            document.getElementById("modalBg").style.display = "none";
+        }
+
+        function openDeleteModal() {
+            document.getElementById("deleteModal").style.display = "flex";
+        }
+        function closeDeleteModal() {
+            document.getElementById("deleteModal").style.display = "none";
+        }
+    </script>
 
 </body>
 </html>

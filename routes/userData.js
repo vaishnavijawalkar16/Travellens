@@ -4,76 +4,161 @@ const RecentSearch = require("../models/RecentSearch");
 const Bookmark = require("../models/Bookmark");
 const User = require("../models/User");
 
-/* middleware */
+/* Middleware */
 function isLoggedIn(req, res, next) {
   if (req.session && req.session.userId) return next();
   return res.redirect("/login");
 }
 
-/* ✅ POST /user/bookmark - prevents duplicate bookmarks */
-router.post("/bookmark", isLoggedIn, async (req, res) => {
+/* 🕒 Add or Update Recent Search (no duplicates) */
+router.post("/recent", isLoggedIn, async (req, res) => {
   try {
     const { landmarkName, imageUrl, location, wikiLink, description } = req.body || {};
-    if (!landmarkName) return res.status(400).send("missing_landmarkName");
+    if (!landmarkName) return res.status(400).send("Missing landmarkName");
 
-    // 🧠 check if bookmark already exists for this user and same landmark
-    const existing = await Bookmark.findOne({
-      user: req.session.userId,
-      landmarkName: { $regex: new RegExp(`^${landmarkName}$`, "i") } // case-insensitive match
+    const normalized = landmarkName.trim().toLowerCase();
+    const userId = req.session.userId;
+
+    const existing = await RecentSearch.findOne({
+      user: userId,
+      landmarkName: { $regex: new RegExp(`^${normalized}$`, "i") },
     });
 
     if (existing) {
-      console.log("⚠️ Duplicate bookmark prevented:", landmarkName);
-      // You can flash a message or just redirect silently
+      await RecentSearch.updateOne(
+        { _id: existing._id },
+        {
+          $set: {
+            createdAt: new Date(),
+            imageUrl: imageUrl || existing.imageUrl,
+            location: location || existing.location,
+            wikiLink: wikiLink || existing.wikiLink,
+            description: description || existing.description,
+          },
+        }
+      );
+
+      await User.findByIdAndUpdate(userId, { $pull: { recentSearches: existing._id } });
+      await User.findByIdAndUpdate(userId, {
+        $push: { recentSearches: { $each: [existing._id], $position: 0 } },
+      });
+
+      console.log("🔁 Updated timestamp for existing recent search:", landmarkName);
+      return res.status(200).send("Recent search updated");
+    }
+
+    const newRecent = new RecentSearch({
+      user: userId,
+      landmarkName: landmarkName.trim(),
+      imageUrl,
+      location,
+      wikiLink,
+      description,
+    });
+
+    const saved = await newRecent.save();
+    await User.findByIdAndUpdate(userId, {
+      $push: { recentSearches: { $each: [saved._id], $position: 0 } },
+    });
+
+    // Keep only 10 latest searches
+    const searches = await RecentSearch.find({ user: userId }).sort({ createdAt: -1 });
+    if (searches.length > 10) {
+      const idsToKeep = searches.slice(0, 10).map((s) => s._id);
+      const idsToDelete = searches.slice(10).map((s) => s._id);
+      await RecentSearch.deleteMany({ _id: { $in: idsToDelete } });
+      await User.findByIdAndUpdate(userId, { $set: { recentSearches: idsToKeep } });
+    }
+
+    console.log("✅ Added new recent search:", landmarkName);
+    res.status(200).send("New recent search added");
+  } catch (err) {
+    console.error("Error saving recent search:", err);
+    res.status(500).send("Failed to save recent search");
+  }
+});
+
+/* 💾 Add Bookmark (no duplicates, updates timestamp) */
+router.post("/bookmark", isLoggedIn, async (req, res) => {
+  try {
+    const { landmarkName, imageUrl, location, wikiLink, description } = req.body || {};
+    if (!landmarkName) return res.status(400).send("Missing landmarkName");
+
+    const normalized = landmarkName.trim().toLowerCase();
+    const userId = req.session.userId;
+
+    const existing = await Bookmark.findOne({
+      user: userId,
+      landmarkName: { $regex: new RegExp(`^${normalized}$`, "i") },
+    });
+
+    if (existing) {
+      await Bookmark.updateOne({ _id: existing._id }, { $set: { createdAt: new Date() } });
+      console.log("⚠️ Duplicate prevented — timestamp updated:", landmarkName);
       return res.redirect("/user/bookmarks");
     }
 
-    // create new bookmark only if not already saved
     const bookmark = new Bookmark({
-      user: req.session.userId,
-      landmarkName,
-      imageUrl: imageUrl || "",
-      location: location || "",
-      wikiLink: wikiLink || "",
-      description: description || ""
+      user: userId,
+      landmarkName: landmarkName.trim(),
+      imageUrl,
+      location,
+      wikiLink,
+      description,
     });
 
     const saved = await bookmark.save();
-    await User.findByIdAndUpdate(req.session.userId, { $push: { bookmarks: saved._id } });
+    await User.findByIdAndUpdate(userId, { $push: { bookmarks: saved._id } });
 
-    return res.redirect("/user/bookmarks");
+    console.log("✅ New bookmark added:", landmarkName);
+    res.redirect("/user/bookmarks");
   } catch (err) {
     console.error("Error saving bookmark:", err);
-    return res.status(500).send("Failed to save bookmark");
+    res.status(500).send("Failed to save bookmark");
   }
 });
 
-/* GET /user/bookmarks */
+/* 📚 Fetch Bookmarks (remove duplicates before sending) */
 router.get("/bookmarks", isLoggedIn, async (req, res) => {
   try {
-    const bookmarks = await Bookmark.find({ user: req.session.userId }).sort({ createdAt: -1 }).lean();
-    return res.render("bookmarks", { bookmarks });
+    let bookmarks = await Bookmark.find({ user: req.session.userId })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // 🔹 Remove duplicates by landmarkName
+    const seen = new Set();
+    bookmarks = bookmarks.filter((b) => {
+      const key = b.landmarkName.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    res.render("bookmarks", { bookmarks });
   } catch (err) {
     console.error("Error fetching bookmarks:", err);
-    return res.status(500).send("Failed to load bookmarks");
+    res.status(500).send("Failed to load bookmarks");
   }
 });
 
-/* DELETE /user/bookmark/delete/:id */
+/* 🗑️ Delete Bookmark */
 router.post("/bookmark/delete/:id", isLoggedIn, async (req, res) => {
   try {
-    const bookmarkId = req.params.id;
-    const deleted = await Bookmark.findOneAndDelete({ _id: bookmarkId, user: req.session.userId });
+    const { id } = req.params;
+    const deleted = await Bookmark.findOneAndDelete({
+      _id: id,
+      user: req.session.userId,
+    });
+
     if (deleted) {
-      await User.findByIdAndUpdate(req.session.userId, { $pull: { bookmarks: bookmarkId } });
-      console.log("✅ Bookmark deleted:", bookmarkId);
-    } else {
-      console.warn("⚠️ Bookmark not found or unauthorized:", bookmarkId);
+      await User.findByIdAndUpdate(req.session.userId, { $pull: { bookmarks: id } });
+      console.log("🗑️ Bookmark deleted:", id);
     }
-    return res.redirect("/user/bookmarks");
+
+    res.redirect("/user/bookmarks");
   } catch (err) {
     console.error("Error deleting bookmark:", err);
-    return res.status(500).send("Failed to delete bookmark");
+    res.status(500).send("Failed to delete bookmark");
   }
 });
 
