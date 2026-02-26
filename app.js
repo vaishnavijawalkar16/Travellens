@@ -27,6 +27,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(fileUpload({ createParentPath: true, limits: { fileSize: 10 * 1024 * 1024 } }));
 
+app.set("trust proxy", 1);
+
 app.use(session({
   secret: process.env.SESSION_SECRET || "Travellens123",
   resave: false,
