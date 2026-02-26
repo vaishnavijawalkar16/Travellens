@@ -8,7 +8,7 @@ router.get("/home", isLoggedIn, async (req, res) => {
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
     );
 
-    // 🔹 Remove duplicates by landmarkName
+    // Remove duplicates by landmarkName
     const seen = new Set();
     recentSearches = recentSearches.filter((s) => {
       const key = s.landmarkName.toLowerCase();

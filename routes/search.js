@@ -7,13 +7,13 @@ const User = require("../models/User");
 
 const FASTAPI_URL = process.env.FASTAPI_URL || "http://localhost:8000/search";
 
-/* Middleware */
+// Middleware
 function isLoggedIn(req, res, next) {
   if (req.session && req.session.userId) return next();
   return res.redirect("/login");
 }
 
-/* 🧠 POST /search/image */
+// POST /search/image
 router.post("/image", isLoggedIn, async (req, res) => {
   try {
     if (!req.files || !req.files.image) {
@@ -27,7 +27,7 @@ router.post("/image", isLoggedIn, async (req, res) => {
       contentType: imageFile.mimetype || "image/jpeg",
     });
 
-    // 🔹 Send image to FastAPI for recognition
+    //  Send image to FastAPI for recognition
     const fastRes = await axios.post(FASTAPI_URL, form, {
       headers: { ...form.getHeaders() },
       timeout: 20000,
@@ -42,7 +42,7 @@ router.post("/image", isLoggedIn, async (req, res) => {
     let description = "No description available.";
     let location = "Unknown location";
 
-    // 🔹 Fetch Wikipedia info if available
+    //  Fetch Wikipedia info if available
     if (wikiLink && wikiLink.includes("wikipedia.org/wiki/")) {
       try {
         const pageTitle = encodeURIComponent(wikiLink.split("/wiki/")[1]);
@@ -67,7 +67,7 @@ router.post("/image", isLoggedIn, async (req, res) => {
 
     const userId = req.session.userId;
 
-    // ✅ Prevent duplicate recent search (update time instead)
+    // Prevent duplicate recent search (update time instead)
     const existing = await RecentSearch.findOne({
       user: userId,
       landmarkName: { $regex: new RegExp(`^${landmarkName}$`, "i") },
@@ -83,11 +83,11 @@ router.post("/image", isLoggedIn, async (req, res) => {
         $push: { recentSearches: { $each: [existing._id], $position: 0 } },
       });
 
-      console.log(`🕒 Updated existing recent search: ${landmarkName}`);
+      console.log(` Updated existing recent search: ${landmarkName}`);
       return res.redirect(`/details/${existing._id}`);
     }
 
-    // 🔹 Add new recent search
+    // Add new recent search
     const newSearch = new RecentSearch({
       user: userId,
       landmarkName,
@@ -109,10 +109,10 @@ router.post("/image", isLoggedIn, async (req, res) => {
       await User.findByIdAndUpdate(userId, { $set: { recentSearches: idsToKeep } });
     }
 
-    console.log(`✅ Added new recent search: ${landmarkName}`);
+    console.log(` Added new recent search: ${landmarkName}`);
     return res.redirect(`/details/${newSearch._id}`);
   } catch (err) {
-    console.error("❌ Search error:", err);
+    console.error(" Search error:", err);
     return res.status(500).send("Error processing image search");
   }
 });

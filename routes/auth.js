@@ -1,8 +1,13 @@
-// routes/auth.js
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
+
+// -----------------------------
+// PASSWORD VALIDATION REGEX
+// -----------------------------
+const passwordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 // -----------------------------
 // SIGNUP ROUTE
@@ -10,28 +15,42 @@ const User = require("../models/User");
 router.post("/signup", async (req, res) => {
   try {
     const { username, email, password } = req.body || {};
+
     if (!username || !email || !password) {
       return res.status(400).send("Missing fields");
     }
 
+    const trimmedPassword = password.trim();
+
+    // ✅ Password validation
+    if (!passwordRegex.test(trimmedPassword)) {
+      return res.status(400).send(
+        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character"
+      );
+    }
+
     // Check if user already exists
-    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
-    if (existingUser) return res.status(400).send("User already exists");
+    const existingUser = await User.findOne({
+      email: email.toLowerCase().trim(),
+    });
+    if (existingUser) {
+      return res.status(400).send("User already exists");
+    }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(trimmedPassword, 10);
 
     const newUser = new User({
       username: username.trim(),
       email: email.toLowerCase().trim(),
-      password: hashedPassword
+      password: hashedPassword,
     });
 
     await newUser.save();
 
     console.log("✅ User registered:", newUser.username);
 
-    // Redirect to login page after successful signup
+    // Redirect to login page
     return res.redirect("/login");
   } catch (error) {
     console.error("❌ Signup error:", error);
@@ -40,31 +59,41 @@ router.post("/signup", async (req, res) => {
 });
 
 // -----------------------------
-// LOGIN ROUTE (fixed session save + redirect)
+// LOGIN ROUTE
 // -----------------------------
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body || {};
-    if (!email || !password) return res.status(400).send("Missing credentials");
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
-    if (!user) return res.status(404).send("User not found");
+    if (!email || !password) {
+      return res.status(400).send("Missing credentials");
+    }
+
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+    });
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).send("Invalid credentials");
+    if (!isMatch) {
+      return res.status(400).send("Invalid credentials");
+    }
 
-    // ✅ Store user info in session
+    // ✅ Store session
     req.session.userId = user._id;
     req.session.username = user.username;
 
-    // ✅ Force save session before redirecting to /home
+    // ✅ Force save before redirect
     req.session.save((err) => {
       if (err) {
-        console.error("Session save error:", err);
+        console.error("❌ Session save error:", err);
         return res.status(500).send("Error creating session");
       }
       console.log("✅ Login successful:", user.username);
-      return res.redirect("/home"); // <-- Let /home route render home properly
+      return res.redirect("/home");
     });
   } catch (error) {
     console.error("❌ Login error:", error);
@@ -86,7 +115,7 @@ router.get("/logout", (req, res) => {
 });
 
 // -----------------------------
-// UPDATE PROFILE
+// UPDATE PROFILE (USERNAME + PASSWORD)
 // -----------------------------
 router.post("/update-profile", async (req, res) => {
   try {
@@ -94,10 +123,21 @@ router.post("/update-profile", async (req, res) => {
 
     const { username, password } = req.body;
 
-    const updateData = { username };
+    const updateData = {
+      username: username?.trim(),
+    };
 
+    // ✅ Only validate if password is being changed
     if (password && password.trim() !== "") {
-      updateData.password = await bcrypt.hash(password, 10);
+      const trimmedPassword = password.trim();
+
+      if (!passwordRegex.test(trimmedPassword)) {
+        return res.status(400).send(
+          "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character"
+        );
+      }
+
+      updateData.password = await bcrypt.hash(trimmedPassword, 10);
     }
 
     const updatedUser = await User.findByIdAndUpdate(
@@ -132,12 +172,10 @@ router.post("/delete-account", async (req, res) => {
     req.session.destroy(() => {
       return res.redirect("/");
     });
-
   } catch (err) {
     console.error("❌ Delete account error:", err);
     return res.status(500).send("Error deleting account");
   }
 });
-
 
 module.exports = router;

@@ -5,7 +5,7 @@ body {
   color: #214b4b;
 }
 
-/* ---------- AUTH PAGES ---------- */
+/*  AUTH PAGES */
 .heading{
   display:flex;
   align-items: center;
@@ -89,12 +89,12 @@ body {
   color: #214b4b;
 }
 
-/* keep everything stacked on mobile */
+/* everything stacked on mobile */
 .auth-container > * {
   margin-bottom: 20px;
 }
 
-/* ----- Desktop / Laptop layout ----- */
+/* Desktop / Laptop layout*/
 @media (min-width: 750px) {
   .auth-container {
     display: grid;
@@ -111,7 +111,7 @@ body {
     text-align: left;                 
   }
 
-  /* Place items into the grid areas */
+  /*items into the grid areas */
   .auth-card { 
     grid-area: auth; 
     justify-self: end;
@@ -140,7 +140,7 @@ body {
     font-size: 22px;               
   }
 }
-/* ---------- HOME PAGE ---------- */
+/* HOME PAGE */
 .home-header {
   box-shadow: 0 0 150px rgba(0,0,0,0.15);
   color:#163333;
@@ -194,7 +194,7 @@ body {
   border-radius: 8px;
 }
 
-/* ---------- DETAILS PAGE ---------- */
+/* DETAILS PAGE */
 .details-header {
   padding: 10px;
 }
@@ -251,7 +251,7 @@ body {
   border-radius: 6px;
 }
 
-/* ---------- NAVIGATION ---------- */
+/* NAVIGATION */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -269,7 +269,7 @@ body {
   cursor: pointer;
 }
 
-/* ---------- BOOKMARKS PAGE ---------- */
+/* BOOKMARKS PAGE  */
 .bookmarks-container {
     max-width: 1100px;
     margin: 40px auto;
@@ -307,7 +307,7 @@ body {
     background: #163333;
 }
 
-/* --- Grid Layout --- */
+/* Grid Layout */
 .bookmark-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -315,7 +315,7 @@ body {
     margin-top: 20px;
 }
 
-/* --- Individual Bookmark Card --- */
+/* Individual Bookmark Card  */
 .bookmark-card {
     background: white;
     border-radius: 12px;
@@ -373,7 +373,7 @@ body {
     background: #b91c1c;
 }
 
-/* --- Responsive --- */
+/* Responsive */
 @media (max-width: 768px) {
     .page-title {
         font-size: 24px;
@@ -384,7 +384,7 @@ body {
     }
 }
 
-/* ---------- ACCOUNT PAGE ---------- */
+/*  ACCOUNT PAGE  */
 
 .account-container {
     max-width: 500px;
@@ -474,7 +474,7 @@ body {
     width: 100%;
 }
 
-/* ---------- MODAL POPUP ---------- */
+/* MODAL POPUP */
 
 .modal-bg {
     display: none;

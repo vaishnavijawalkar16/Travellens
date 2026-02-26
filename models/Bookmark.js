@@ -10,7 +10,6 @@ const bookmarkSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-// Prevent duplicates at database level too
 bookmarkSchema.index({ user: 1, landmarkName: 1 }, { unique: true });
 
 module.exports = mongoose.model("Bookmark", bookmarkSchema);
