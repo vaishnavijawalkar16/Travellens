@@ -1,17 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TravelLens - Account</title>
-    <link rel="stylesheet" href="/css/style.css">
-</head>
+<%- include('partials/head', { title: 'Your Profile', css: 'account' }) %>
 
 <body>
+    <%- include('partials/header', { title: 'Travellens' }) %>
 
     <div class="account-container">
-        <h1 class="title">Your Profile</h1>
-
+        <div class="account-header">
+            <h1 class="account-title">Your Profile</h1>
+        </div>
         <div class="account-info">
             <div class="info-row">
                 <span class="info-label">Username</span>
@@ -24,7 +21,7 @@
             </div>
         </div>
 
-        <div style="text-align:center; margin-top: 20px;">
+        <div class="action-row">
             <button class="edit-btn" onclick="openModal()">Edit Profile</button>
         </div>
 
@@ -32,7 +29,7 @@
             <a href="/auth/logout" class="logout-link">Logout</a>
         </div>
 
-        <div style="margin-top: 20px; text-align:center;">
+        <div class="delete-row">
             <button class="delete-btn" onclick="openDeleteModal()">Delete Account</button>
         </div>
     </div>
@@ -44,23 +41,21 @@
 
             <h2 class="modal-title">Edit Profile</h2>
 
-            <form action="/auth/update-profile" method="POST">
+            <form id="edit-profile-form">
                 
                 <div class="edit-field">
                     <label>Username</label>
-                    <input type="text" name="username" value="<%= user.username %>" required>
-                </div>
-
-                <div class="edit-field">
-                    <label>Email (cannot be changed)</label>
-                    <input type="text" value="<%= user.email %>" disabled>
+                    <input type="text" name="username" id="edit-username" value="<%= user.username %>" data-current-username="<%= user.username %>" required>
+                    <span class="error-text" id="edit-username-error"></span>
                 </div>
 
                 <div class="edit-field">
                     <label>New Password (optional)</label>
-                    <input type="password" name="password" placeholder="Enter new password">
+                    <input type="password" name="password" id="edit-password" placeholder="Enter new password">
+                    <span class="error-text" id="edit-password-error"></span>
                 </div>
 
+                <div id="edit-general-error" class="error-text"></div>
                 <button type="submit" class="edit-submit">Save Changes</button>
             </form>
 
@@ -72,9 +67,9 @@
         <div class="modal">
             <span class="close-btn" onclick="closeDeleteModal()">×</span>
 
-            <h2 class="modal-title" style="color: red;">Confirm Delete</h2>
+            <h2 class="modal-title danger">Confirm Delete</h2>
 
-            <p style="text-align:center; margin-bottom: 20px;">
+            <p class="modal-text">
                 This action will <b>permanently delete your account</b> and all saved data.
             </p>
 
@@ -82,27 +77,14 @@
                 <button type="submit" class="delete-submit">Yes, Delete My Account</button>
             </form>
 
-            <button onclick="closeDeleteModal()" class="edit-submit" style="margin-top:10px;">
+            <button onclick="closeDeleteModal()" class="edit-submit mt-10">
                 Cancel
             </button>
         </div>
     </div>
 
-    <script>
-        function openModal() {
-            document.getElementById("modalBg").style.display = "flex";
-        }
-        function closeModal() {
-            document.getElementById("modalBg").style.display = "none";
-        }
+    <script src="/js/account.js"></script>
 
-        function openDeleteModal() {
-            document.getElementById("deleteModal").style.display = "flex";
-        }
-        function closeDeleteModal() {
-            document.getElementById("deleteModal").style.display = "none";
-        }
-    </script>
-
+    <%- include('partials/footer') %>
 </body>
 </html>

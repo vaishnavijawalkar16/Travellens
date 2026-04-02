@@ -1,0 +1,128 @@
+.home-container {
+  padding: 15px;
+  text-align: center;
+}
+
+.snap-actions {
+  display: flex;
+  gap: 12px;
+  margin: 15px 0 25px;
+}
+
+.snap-btn {
+  flex: 1;
+  background: #214b4b;
+  color: white;
+  padding: 16px 10px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(33, 75, 75, 0.15);
+}
+
+.snap-btn:hover {
+  background: #1a3c3c;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(33, 75, 75, 0.25);
+}
+
+.snap-btn i {
+  font-size: 20px;
+  margin: 0;
+}
+
+.snap-btn.gallery {
+  background: #ffffff;
+  color: #214b4b;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.snap-btn.gallery:hover {
+  background: #f9f9f9;
+  border-color: #214b4b;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.snap-btn.gallery i {
+  color: #214b4b;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
+
+@media (min-width: 768px) {
+  .cards {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+  }
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(33,75,75,0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  border: 1px solid rgba(33,75,75,0.05);
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(33,75,75,0.12);
+}
+
+.card img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  transition: opacity 0.3s ease;
+}
+
+.card h4 {
+  margin: 12px 10px 4px;
+  font-size: 0.95rem;
+  color: #214b4b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+
+.card p {
+  margin: 0 10px 15px;
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.no-searches {
+  text-align: center;
+  color: #888;
+  margin-top: 30px;
+  font-size: 15px;
+}
+
+.hidden-input {
+  display: none;
+}
+
+.fa-solid {
+  color: white;
+  margin-right: 15px;
+  font-size: 25px;
+}

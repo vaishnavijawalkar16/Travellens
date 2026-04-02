@@ -1,7 +1,8 @@
-// SHOW USER NAME ON HOME
+// CLEANUP ALL PREVIOUS CACHES & STORAGE
+localStorage.clear();
+sessionStorage.clear();
+
+// SHOW USER NAME ON HOME (if it existed in session instead)
 window.onload = function () {
-  let user = localStorage.getItem("username");
-  if (user && document.getElementById("user-display")) {
-    document.getElementById("user-display").innerText = user;
-  }
+  // Logic for displaying username from server/session instead of localstorage
 };

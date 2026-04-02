@@ -4,10 +4,47 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 
 // -----------------------------
+// HELPER: Send Response
+// -----------------------------
+const sendResponse = (req, res, status, message, redirectUrl) => {
+  if (req.xhr || (req.headers.accept && req.headers.accept.includes("application/json"))) {
+    return res.status(status).json({ message, redirectUrl });
+  }
+  if (status >= 400) {
+    return res.status(status).send(message);
+  }
+  return res.redirect(redirectUrl);
+};
+
+// -----------------------------
 // PASSWORD VALIDATION REGEX
 // -----------------------------
 const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+// -----------------------------
+// VALIDATION: CHECK IF EXISTS
+// -----------------------------
+router.post("/check-exists", async (req, res) => {
+  try {
+    const { field, value } = req.body;
+    if (!field || !value) return res.status(400).json({ error: "Invalid request" });
+
+    const query = {};
+    if (field === "email") {
+      query.email = value.toLowerCase().trim();
+    } else if (field === "username") {
+      query.username = value.trim();
+    } else {
+      return res.status(400).json({ error: "Invalid field" });
+    }
+
+    const user = await User.findOne(query);
+    return res.json({ exists: !!user });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 // -----------------------------
 // SIGNUP ROUTE
@@ -17,24 +54,25 @@ router.post("/signup", async (req, res) => {
     const { username, email, password } = req.body || {};
 
     if (!username || !email || !password) {
-      return res.status(400).send("Missing fields");
+      return sendResponse(req, res, 400, "Missing fields");
     }
 
     const trimmedPassword = password.trim();
 
-    // ✅ Password validation
+    // Password validation
     if (!passwordRegex.test(trimmedPassword)) {
-      return res.status(400).send(
-        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character"
-      );
+      return sendResponse(req, res, 400, "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character");
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({
-      email: email.toLowerCase().trim(),
-    });
+    const existingEmail = await User.findOne({ email: email.toLowerCase().trim() });
+    if (existingEmail) {
+      return sendResponse(req, res, 400, "Email already exists");
+    }
+
+    const existingUser = await User.findOne({ username: username.trim() });
     if (existingUser) {
-      return res.status(400).send("User already exists");
+      return sendResponse(req, res, 400, "Username already exists");
     }
 
     // Hash password
@@ -47,14 +85,12 @@ router.post("/signup", async (req, res) => {
     });
 
     await newUser.save();
+    console.log("User registered:", newUser.username);
 
-    console.log("✅ User registered:", newUser.username);
-
-    // Redirect to login page
-    return res.redirect("/login");
+    return sendResponse(req, res, 201, "Registration successful", "/login");
   } catch (error) {
-    console.error("❌ Signup error:", error);
-    return res.status(500).send("Error signing up user");
+    console.error("Signup error:", error);
+    return sendResponse(req, res, 500, "Error signing up user");
   }
 });
 
@@ -66,38 +102,35 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body || {};
 
     if (!email || !password) {
-      return res.status(400).send("Missing credentials");
+      return sendResponse(req, res, 400, "Missing credentials");
     }
 
-    const user = await User.findOne({
-      email: email.toLowerCase().trim(),
-    });
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
 
     if (!user) {
-      return res.status(404).send("User not found");
+      return sendResponse(req, res, 404, "User not found");
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).send("Invalid credentials");
+      return sendResponse(req, res, 400, "Incorrect password");
     }
 
-    // ✅ Store session
+    // Store session
     req.session.userId = user._id;
     req.session.username = user.username;
 
-    // ✅ Force save before redirect
     req.session.save((err) => {
       if (err) {
-        console.error("❌ Session save error:", err);
-        return res.status(500).send("Error creating session");
+        console.error("Session save error:", err);
+        return sendResponse(req, res, 500, "Error creating session");
       }
-      console.log("✅ Login successful:", user.username);
-      return res.redirect("/home");
+      console.log("Login successful:", user.username);
+      return sendResponse(req, res, 200, "Login successful", "/home");
     });
   } catch (error) {
-    console.error("❌ Login error:", error);
-    return res.status(500).send("Error logging in");
+    console.error("Login error:", error);
+    return sendResponse(req, res, 500, "Error logging in");
   }
 });
 
@@ -107,7 +140,7 @@ router.post("/login", async (req, res) => {
 router.get("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
-      console.error("❌ Session destroy error:", err);
+      console.error("Session destroy error:", err);
       return res.status(500).send("Error logging out");
     }
     res.redirect("/");
@@ -122,19 +155,24 @@ router.post("/update-profile", async (req, res) => {
     if (!req.session.userId) return res.redirect("/login");
 
     const { username, password } = req.body;
+    const updateData = {};
 
-    const updateData = {
-      username: username?.trim(),
-    };
+    if (username) {
+      const trimmedUsername = username.trim();
+      // Check if username taken by someone else
+      const existing = await User.findOne({ username: trimmedUsername, _id: { $ne: req.session.userId } });
+      if (existing) {
+        return sendResponse(req, res, 400, "Username already exists");
+      }
+      updateData.username = trimmedUsername;
+    }
 
-    // ✅ Only validate if password is being changed
+    // Only validate if password is being changed
     if (password && password.trim() !== "") {
       const trimmedPassword = password.trim();
 
       if (!passwordRegex.test(trimmedPassword)) {
-        return res.status(400).send(
-          "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character"
-        );
+        return sendResponse(req, res, 400, "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character");
       }
 
       updateData.password = await bcrypt.hash(trimmedPassword, 10);
@@ -147,12 +185,12 @@ router.post("/update-profile", async (req, res) => {
     );
 
     // Update session username
-    req.session.username = updatedUser.username;
+    if (updatedUser) req.session.username = updatedUser.username;
 
-    return res.redirect("/account");
+    return sendResponse(req, res, 200, "Profile updated", "/account");
   } catch (err) {
-    console.error("❌ Update profile error:", err);
-    return res.status(500).send("Error updating profile");
+    console.error("Update profile error:", err);
+    return sendResponse(req, res, 500, "Error updating profile");
   }
 });
 
@@ -164,16 +202,13 @@ router.post("/delete-account", async (req, res) => {
     if (!req.session.userId) return res.redirect("/login");
 
     const userId = req.session.userId;
-
-    // Delete user
     await User.findByIdAndDelete(userId);
 
-    // Destroy session
     req.session.destroy(() => {
       return res.redirect("/");
     });
   } catch (err) {
-    console.error("❌ Delete account error:", err);
+    console.error("Delete account error:", err);
     return res.status(500).send("Error deleting account");
   }
 });

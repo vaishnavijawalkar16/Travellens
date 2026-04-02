@@ -1,31 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Travel Lens - Sign Up</title>
-  <link rel="stylesheet" href="/css/style.css">
-</head>
+<%- include('partials/head', { title: 'Sign Up', css: 'auth' }) %>
 <body>
 
   <div class="auth-container">
     <div class="heading">
-      <img src="images/logo1.png" alt="Travel Lens Logo" class="logo">
-      <h1 class="title">Travel lens</h1>
+      <img src="/images/logo1.png" alt="Travel Lens Logo" class="logo">
+      <h1 class="title">Travellens</h1>
     </div>
-    <img src="images/signup.png" alt="Traveler Illustration" class="illustration">
+    <img src="/images/signup.png" alt="Traveler Illustration" class="illustration">
 
     <div class="auth-card" >
-    <form class="auth-form" action="/auth/signup" method="POST">
-      <input type="text" name="username" placeholder="Name" id="signup-name" required>
-      <input type="email" name="email" placeholder="Email" id="signup-email" required>
-      <input type="password" name="password" placeholder="Password" id="signup-password" required>
+    <form class="auth-form" id="signup-form" action="/auth/signup" method="POST">
+      <div class="input-group">
+        <input type="text" name="username" placeholder="Username" id="signup-name" required>
+        <span class="error-text" id="username-error"></span>
+      </div>
+      <div class="input-group">
+        <input type="email" name="email" placeholder="Email" id="signup-email" required>
+        <span class="error-text" id="email-error"></span>
+      </div>
+      <div class="input-group">
+        <input type="password" name="password" placeholder="Password" id="signup-password" required>
+        <span class="error-text" id="password-error"></span>
+      </div>
       <button type="submit">Sign Up</button>
 
       <p class="switch">or</p>
       <a href="/login" class="switch-btn">Log in</a>
     </form>
     </div>
+
+    <script src="/js/signup.js"></script>
     
     <p class="tagline">See it, Snap it, Know it</p>
   </div>

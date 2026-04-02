@@ -11,6 +11,7 @@ const recentSearchSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+//update createdAt automatically
 recentSearchSchema.pre("save", function (next) {
   this.createdAt = new Date();
   next();

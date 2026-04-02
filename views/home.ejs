@@ -1,25 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Travel Lens - Home</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-</head>
+<%- include('partials/head', { title: 'Home', css: 'home' }) %>
 <body>
-  <header class="home-header">
-    <img src="/images/logo1.png" class="logo-small" alt="logo">
-    <h2 class="title">Travel Lens</h2>
-    <i class="#"></i>
-  </header>
+  <%- include('partials/header', { title: 'Travellens' }) %>
 
   <main class="home-container">
     <h3>Welcome Back, <%= userName || "Traveler" %>!</h3>
 
     <form id="uploadForm" action="/search/image" method="POST" enctype="multipart/form-data">
-      <input id="image-input" type="file" name="image" accept="image/*" capture="environment" style="display:none;">
-      <button type="button" class="snap-btn" id="upload-btn">📸 Tap to Snap<br><small>or Upload</small></button>
+      <input id="camera-input" type="file" name="image" accept="image/*" capture="environment" class="hidden-input">
+      <input id="gallery-input" type="file" name="image" accept="image/*" class="hidden-input">
+      
+      <div class="snap-actions">
+        <button type="button" class="snap-btn camera" id="snap-btn">
+          <i class="fa-solid fa-camera"></i> Tap to Snap
+        </button>
+        <button type="button" class="snap-btn gallery" id="gallery-btn">
+          <i class="fa-solid fa-image"></i> Upload from Gallery
+        </button>
+      </div>
     </form>
 
     <h3>Recent Searches</h3>
@@ -33,20 +32,13 @@
           </div>
         <% }) %>
       <% } else { %>
-        <p style="text-align:center;color:gray;">No recent searches yet.</p>
+        <p class="no-searches">No recent searches yet.</p>
       <% } %>
     </div>
   </main>
 
-  <nav class="bottom-nav">
-    <i class="fa-solid fa-house" onclick="location.href='/home'"></i>
-    <i class="fa-solid fa-heart" onclick="location.href='/user/bookmarks'"></i>
-    <i class="fa-solid fa-user" onclick="location.href='/account'"></i>
-  </nav>
+  <%- include('partials/footer') %>
 
-  <script>
-    document.getElementById('upload-btn').addEventListener('click', () => document.getElementById('image-input').click());
-    document.getElementById('image-input').addEventListener('change', function() { if (this.files.length) document.getElementById('uploadForm').submit(); });
-  </script>
+  <script src="/js/home.js"></script>
 </body>
 </html>

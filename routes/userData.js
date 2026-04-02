@@ -4,13 +4,13 @@ const RecentSearch = require("../models/RecentSearch");
 const Bookmark = require("../models/Bookmark");
 const User = require("../models/User");
 
-// Middleware
+/* Middleware */
 function isLoggedIn(req, res, next) {
   if (req.session && req.session.userId) return next();
   return res.redirect("/login");
 }
 
-// Add or Update Recent Search (no duplicates)
+/* Add or Update Recent Search (no duplicates) */
 router.post("/recent", isLoggedIn, async (req, res) => {
   try {
     const { landmarkName, imageUrl, location, wikiLink, description } = req.body || {};
@@ -78,7 +78,7 @@ router.post("/recent", isLoggedIn, async (req, res) => {
   }
 });
 
-//  Add Bookmark (no duplicates, updates timestamp)
+/* Add Bookmark (no duplicates, updates timestamp) */
 router.post("/bookmark", isLoggedIn, async (req, res) => {
   try {
     const { landmarkName, imageUrl, location, wikiLink, description } = req.body || {};
@@ -94,7 +94,7 @@ router.post("/bookmark", isLoggedIn, async (req, res) => {
 
     if (existing) {
       await Bookmark.updateOne({ _id: existing._id }, { $set: { createdAt: new Date() } });
-      console.log(" Duplicate prevented — timestamp updated:", landmarkName);
+      console.log("Duplicate prevented — timestamp updated:", landmarkName);
       return res.redirect("/user/bookmarks");
     }
 
@@ -110,7 +110,7 @@ router.post("/bookmark", isLoggedIn, async (req, res) => {
     const saved = await bookmark.save();
     await User.findByIdAndUpdate(userId, { $push: { bookmarks: saved._id } });
 
-    console.log(" New bookmark added:", landmarkName);
+    console.log("New bookmark added:", landmarkName);
     res.redirect("/user/bookmarks");
   } catch (err) {
     console.error("Error saving bookmark:", err);
@@ -118,14 +118,14 @@ router.post("/bookmark", isLoggedIn, async (req, res) => {
   }
 });
 
-//  Fetch Bookmarks (remove duplicates before sending) 
+/* Fetch Bookmarks (remove duplicates before sending) */
 router.get("/bookmarks", isLoggedIn, async (req, res) => {
   try {
     let bookmarks = await Bookmark.find({ user: req.session.userId })
       .sort({ createdAt: -1 })
       .lean();
 
-    // Remove duplicates by landmarkName
+    // 🔹 Remove duplicates by landmarkName
     const seen = new Set();
     bookmarks = bookmarks.filter((b) => {
       const key = b.landmarkName.toLowerCase();
@@ -141,7 +141,7 @@ router.get("/bookmarks", isLoggedIn, async (req, res) => {
   }
 });
 
-//  Delete Bookmark 
+/* Delete Bookmark */
 router.post("/bookmark/delete/:id", isLoggedIn, async (req, res) => {
   try {
     const { id } = req.params;
@@ -152,7 +152,7 @@ router.post("/bookmark/delete/:id", isLoggedIn, async (req, res) => {
 
     if (deleted) {
       await User.findByIdAndUpdate(req.session.userId, { $pull: { bookmarks: id } });
-      console.log(" Bookmark deleted:", id);
+      console.log("Bookmark deleted:", id);
     }
 
     res.redirect("/user/bookmarks");

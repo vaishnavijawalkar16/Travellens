@@ -1,0 +1,166 @@
+.heading{
+  display:flex;
+  align-items: center;
+  justify-self: center;
+  gap:10px;
+}
+.auth-container {
+  text-align: center;
+  padding: 30px;
+}
+.auth-card {
+  border-radius: 20px;
+  padding: 40px 20px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 15px 45px rgba(0,0,0,0.08);
+  background: white;
+}
+.logo {
+  width: 90px;
+}
+
+.title {
+  font-family: 'Pacifico', cursive;
+  font-size: 28px;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.illustration {
+  width: 250px;
+  margin: 0 ;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.input-group {
+  width: 80%;
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 14px 18px;
+  margin: 0;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  font-size: 15px;
+  background: #fdfdfd;
+  transition: all 0.3s;
+}
+
+.auth-form input:focus {
+  border-color: #2c6b68;
+  box-shadow: 0 0 0 4px rgba(44, 107, 104, 0.1);
+  outline: none;
+  background: white;
+}
+
+.error-text {
+  color: #e74c3c;
+  font-size: 12.5px;
+  margin: 5px 0 12px;
+  width: 100%;
+  text-align: left;
+  min-height: 15px;
+  font-weight: 500;
+  padding-left: 5px;
+}
+
+.auth-form button {
+  width: 80%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: #214b4b;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 10px 0;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.auth-form button:hover {
+  background: #163333;
+  transform: translateY(-1px);
+}
+
+.switch {
+  margin: 8px 0;
+  color: #888;
+}
+
+.switch-btn {
+  text-decoration: none;
+  background: #2c6b68;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+}
+
+.tagline {
+  margin-top: 30px;
+  font-size: larger;
+  font-weight: bold;
+  color: #214b4b;
+}
+
+/* keep everything stacked on mobile */
+.auth-container > * {
+  margin-bottom: 20px;
+}
+
+/* ----- Desktop / Laptop layout ----- */
+@media (min-width: 750px) {
+  .auth-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;   /* left = form, right = info */
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "auth heading"
+      "auth illustration"
+      "auth tagline";
+    column-gap: 48px;
+    align-items: center;
+    max-width: 1100px;                
+    margin: 0 auto;                   
+    text-align: left;                 
+  }
+
+  /* Place items into the grid areas */
+  .auth-card { 
+    grid-area: auth; 
+    justify-self: end;
+    width: 100%;
+    max-width: 420px;                
+  }
+
+  .heading { 
+    grid-area: heading; 
+    justify-self:start;
+  }
+
+  .illustration { 
+    grid-area: illustration; 
+    justify-self: start;
+    width: 360px;                    
+    max-width: 100%;
+    margin: 20px 0;
+  }
+
+  .tagline { 
+    grid-area: tagline; 
+    justify-self: start;
+    margin-left: 50px;
+    margin-top: 10px;
+    font-size: 22px;               
+  }
+}

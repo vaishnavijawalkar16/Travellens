@@ -9,13 +9,14 @@ const fileUpload = require("express-fileupload");
 const authRoutes = require("./routes/auth");
 const searchRoutes = require("./routes/search");
 const userDataRoutes = require("./routes/userData");
-const detailsRoutes = require("./routes/details");
+const detailsRoutes = require("./routes/details"); // optional, if you created it
+
 
 const User = require("./models/User");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/travellens";
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/travellens";
 
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -27,15 +28,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(fileUpload({ createParentPath: true, limits: { fileSize: 10 * 1024 * 1024 } }));
 
-app.set("trust proxy", 1);
-
 app.use(session({
-  secret: process.env.SESSION_SECRET || "Travellens123",
+  secret: process.env.SESSION_SECRET || "change_this_secret",
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({ mongoUrl: MONGODB_URI, ttl: 14 * 24 * 60 * 60 }),
   cookie: { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax" }
 }));
+
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  res.set('Vary', '*'); // Discourage shared caches/proxies
+  next();
+});
 
 // Make session available in EJS views
 app.use((req, res, next) => {
@@ -47,7 +54,15 @@ app.use((req, res, next) => {
 // View Engine Setup
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public"), {
+  etag: false,
+  lastModified: false,
+  setHeaders: (res, path) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+  }
+}));
 
 // Routes
 app.use("/auth", authRoutes);
@@ -60,7 +75,7 @@ app.get("/home", async (req, res) => {
   try {
     if (!req.session.userId) return res.redirect("/login");
 
-    console.log("Session userId:", req.session.userId); 
+    console.log("Session userId:", req.session.userId); // debug check
 
     const user = await User.findById(req.session.userId)
       .populate({
@@ -98,4 +113,4 @@ app.use((err, req, res, next) => {
   res.status(500).render("error", { message: "Something went wrong" });
 });
 
-app.listen(PORT, () => console.log(`Server listening on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(` Server listening on http://localhost:${PORT}`));

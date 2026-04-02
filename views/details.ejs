@@ -1,49 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Travel Lens - <%= landmarkName %></title>
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-</head>
+<%- include('partials/head', { title: landmarkName, css: 'details' }) %>
 <body>
-  <header class="details-header">
-    <i class="fa-solid fa-arrow-left" onclick="history.back()"></i>
-  </header>
+  <%- include('partials/header', { title: 'Travellens' }) %>
 
   <main class="details-container">
-    <img class="details-img" src="<%= imageUrl || '/images/default-landmark.jpg' %>" alt="<%= landmarkName %>">
-    <h2>
-      <% if (wikipediaLink) { %>
-        <a href="<%= wikipediaLink %>" target="_blank" rel="noopener"><%= landmarkName %></a>
-      <% } else { %>
-        <%= landmarkName %>
+    <div class="image-wrapper">
+      <img class="details-img" src="<%= imageUrl || '/images/default-landmark.jpg' %>" alt="<%= landmarkName %>">
+      <div class="image-overlay">
+        <h1><%= landmarkName %></h1>
+      </div>
+    </div>
+
+    <div class="content-section">
+
+      <div class="description-box">
+        <h3 class="section-title-with-tts">
+          Overview
+          <button class="tts-btn" onclick="toggleTTS('description-text', this)" title="Listen to Overview">
+            <i class="fa-solid fa-volume-high"></i>
+          </button>
+        </h3>
+        <p class="description" id="description-text"><%= description || "No description available." %></p>
+      </div>
+
+      <% if (sections && sections.length > 0) { %>
+        <div class="detailed-info-section">
+          <h3 class="section-title-with-tts">
+            <span><i class="fa-solid fa-circle-info"></i> Detailed Information</span>
+            <button class="tts-btn master-tts" onclick="playAllSections(this)" title="Listen to all sections">
+              <i class="fa-solid fa-play"></i> Listen All
+            </button>
+          </h3>
+          <div class="accordion">
+            <% sections.forEach(section => { %>
+              <div class="accordion-item" data-index="<%= section.index %>" data-title="<%= wikiTitle %>">
+              <div class="accordion-header">
+                <span class="section-title"><%= section.title %></span>
+                <div class="accordion-controls">
+                  <button class="tts-btn section-tts-btn" onclick="event.stopPropagation(); toggleTTSFromElement(this.closest('.accordion-item'), this)" title="Listen this section">
+                    <i class="fa-solid fa-volume-high"></i>
+                  </button>
+                  <i class="fa-solid fa-chevron-down icon"></i>
+                </div>
+              </div>
+                <div class="accordion-content">
+                  <div class="loader-container" style="display: none;">
+                    <div class="loader"></div>
+                  </div>
+                  <div class="content-body"></div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
       <% } %>
-    </h2>
 
-    <p class="description"><%= description || "No description available." %></p>
+      <div class="details-actions">
+        <form action="/user/bookmark" method="POST" class="bookmark-form">
+          <input type="hidden" name="landmarkName" value="<%= landmarkName %>">
+          <input type="hidden" name="imageUrl" value="<%= imageUrl %>">
+          <input type="hidden" name="wikiLink" value="<%= wikipediaLink %>">
+          <input type="hidden" name="location" value="<%= location %>">
+          <input type="hidden" name="description" value="<%= description %>">
+          <button type="submit" class="btn-bookmark"><i class="fa-solid fa-bookmark"></i> Bookmark</button>
+        </form>
 
-    <div class="details-actions">
-      <form action="/user/bookmark" method="POST" class="bookmark-form">
-        <input type="hidden" name="landmarkName" value="<%= landmarkName %>">
-        <input type="hidden" name="imageUrl" value="<%= imageUrl %>">
-        <input type="hidden" name="wikiLink" value="<%= wikipediaLink %>">
-        <input type="hidden" name="location" value="<%= location %>">
-        <input type="hidden" name="description" value="<%= description %>">
-        <button type="submit" class="btn-bookmark"><i class="fa-solid fa-bookmark"></i> Bookmark</button>
-      </form>
-
-      <button class="btn-share" onclick="navigator.share && navigator.share({ title: '<%= landmarkName %>', url: window.location.href })">
-        <i class="fa-solid fa-share-nodes"></i> Share
-      </button>
+        <button class="btn-share" onclick="navigator.share && navigator.share({ title: '<%= landmarkName %>', url: window.location.href })">
+          <i class="fa-solid fa-share-nodes"></i> Share
+        </button>
+      </div>
     </div>
   </main>
 
-  <nav class="bottom-nav">
-    <i class="fa-solid fa-house" onclick="location.href='/home'"></i>
-    <i class="fa-solid fa-heart" onclick="location.href='/user/bookmarks'"></i>
-    <i class="fa-solid fa-user" onclick="location.href='/account'"></i>
-  </nav>
+  <script src="/js/details.js"></script>
+
+  <%- include('partials/footer') %>
 </body>
 </html>

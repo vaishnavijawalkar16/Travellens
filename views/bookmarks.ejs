@@ -1,42 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Your Bookmarks</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    .remove-btn {
-      background: #ff4d4d;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 6px 10px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      margin-top: 8px;
-    }
-    .remove-btn:hover {
-      background: #e60000;
-    }
-    .card {
-      position: relative;
-      transition: 0.3s;
-    }
-    .card:hover {
-      transform: scale(1.03);
-    }
-  </style>
-</head>
+<%- include('partials/head', { title: 'Bookmarks', css: 'bookmarks' }) %>
 <body>
-  <header class="home-header">
-    <img src="/images/logo1.png" class="logo-small" alt="logo">
-    <h2>Bookmarks</h2>
-    <i class="#"></i>
-  </header>
+  <%- include('partials/header', { title: 'Travellens' }) %>
 
   <main class="home-container">
+    <h2>Bookmarks</h2>
     <% if (!bookmarks || bookmarks.length === 0) { %>
       <p class="no-bookmarks">No bookmarks yet. Save landmarks from the details page.</p>
     <% } else { %>
@@ -57,10 +26,6 @@
     <% } %>
   </main>
 
-  <nav class="bottom-nav">
-    <i class="fa-solid fa-house" onclick="location.href='/home'"></i>
-    <i class="fa-solid fa-heart" onclick="location.href='/user/bookmarks'"></i>
-    <i class="fa-solid fa-user" onclick="location.href='/account'"></i>
-  </nav>
+  <%- include('partials/footer') %>
 </body>
 </html>
