@@ -37,6 +37,15 @@ router.post("/image", isLoggedIn, async (req, res) => {
     const landmarkName = (landmark.landmarkName || landmark.name || "").trim();
     const wikiLink = (landmark.wikiLink || landmark.wikipedialink || "").trim();
 
+    // 🔹 Validation: Ensure we actually found a landmark
+    if (!landmarkName || landmarkName === "") {
+      console.warn("AI Recognition failed to identify a specific landmark.");
+      return res.status(404).render("404", { 
+        title: "Landmark Not Recognized",
+        message: "We couldn't identify a specific landmark in this image. Please try a clearer photo!" 
+      });
+    }
+
     let imageUrl =
       "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/No_image_available.svg/600px-No_image_available.svg.png";
     let description = "No description available.";
@@ -112,8 +121,16 @@ router.post("/image", isLoggedIn, async (req, res) => {
     console.log(`Added new recent search: ${landmarkName}`);
     return res.redirect(`/details/${newSearch._id}`);
   } catch (err) {
-    console.error("Search error:", err);
-    return res.status(500).send("Error processing image search");
+    if (err.response && err.response.status === 404) {
+      console.error("[Search Error] AI Service (Ngrok) is OFFLINE or URL has changed. Update your FASTAPI_URL in .env");
+    } else if (err.code === 'ECONNABORTED') {
+      console.error("[Search Error] AI Service timed out. The model might be loading slowly on Colab.");
+    } else {
+      console.error("Search error:", err.message || err);
+    }
+    return res.status(503).render("error", { 
+      message: "AI Search Service is currently offline. Please check the backend connection." 
+    });
   }
 });
 

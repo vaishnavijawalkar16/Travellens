@@ -7,6 +7,13 @@ const bookmarkSchema = new mongoose.Schema({
   location: { type: String, default: "" },
   wikiLink: { type: String, default: "" },
   description: { type: String, default: "" },
+  chatHistory: [
+    {
+      role: { type: String, enum: ["user", "bot"] },
+      content: { type: String },
+      timestamp: { type: Date, default: Date.now },
+    }
+  ],
   createdAt: { type: Date, default: Date.now },
 });
 

@@ -15,11 +15,13 @@ const detailsRoutes = require("./routes/details"); // optional, if you created i
 const User = require("./models/User");
 
 const app = express();
+app.set("trust proxy", 1); //Trust the Render reverse proxy for secure cookies
+
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/travellens";
 
 // Connect to MongoDB
-mongoose.connect(MONGODB_URI)
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
@@ -29,11 +31,21 @@ app.use(express.urlencoded({ extended: true }));
 app.use(fileUpload({ createParentPath: true, limits: { fileSize: 10 * 1024 * 1024 } }));
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || "change_this_secret",
+  secret: process.env.SESSION_SECRET || "travellens_super_secret_key",
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({ mongoUrl: MONGODB_URI, ttl: 14 * 24 * 60 * 60 }),
-  cookie: { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax" }
+  proxy: true, // Ensure proxy support is enabled
+  store: MongoStore.create({ 
+    mongoUrl: MONGODB_URI, 
+    ttl: 14 * 24 * 60 * 60,
+    autoRemove: 'native' 
+  }),
+  cookie: { 
+    httpOnly: true, 
+    secure: process.env.NODE_ENV === "production", 
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Better for mobile/cross-site redirection
+    maxAge: 14 * 24 * 60 * 60 * 1000 
+  }
 }));
 
 app.use((req, res, next) => {

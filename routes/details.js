@@ -57,6 +57,7 @@ router.get("/details/:id", isLoggedIn, async (req, res) => {
     }
 
     return res.render("details", {
+      id: id,
       landmarkName: record.landmarkName,
       wikipediaLink: record.wikiLink,
       detailedWikiLink: detailedWikiLink,
@@ -64,7 +65,8 @@ router.get("/details/:id", isLoggedIn, async (req, res) => {
       description: record.description || "",
       location: record.location || "",
       sections: sections,
-      wikiTitle: wikiTitle
+      wikiTitle: wikiTitle,
+      chatHistory: record.chatHistory || []
     });
   } catch (err) {
     console.error(err);
@@ -93,6 +95,69 @@ router.get("/api/wiki/section", isLoggedIn, async (req, res) => {
   } catch (err) {
     console.error("Wiki section fetch error:", err.message);
     res.status(500).json({ error: "Failed to fetch section content" });
+  }
+});
+
+// -----------------------------
+// AI CHAT PROXY + PERSISTENCE
+// -----------------------------
+router.post("/api/chat", isLoggedIn, async (req, res) => {
+  try {
+    const { id, message, context } = req.body;
+    if (!id || !message) return res.status(400).json({ error: "ID and message required" });
+
+    // 🔹 1. Fetch comprehensive landmark info from DB
+    let record = await RecentSearch.findById(id);
+    if (!record) record = await Bookmark.findById(id);
+
+    let ragContext = context || "";
+
+    // 🔹 2. Enhance Context from Wikipedia if needed
+    if (record && record.wikiLink && record.wikiLink.includes("/wiki/")) {
+      try {
+        const wikiTitle = record.wikiLink.split("/wiki/")[1];
+        const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${wikiTitle}`;
+        const wikiResp = await axios.get(wikiApiUrl, {
+          headers: { "User-Agent": "TravelLens/1.0" },
+          timeout: 4000
+        });
+
+        if (wikiResp.data && wikiResp.data.extract) {
+          // Add Wikipedia summary to ensure core facts are present
+          ragContext = `Knowledge Base (Wikipedia): ${wikiResp.data.extract}\n\nUser Session Context: ${ragContext}`;
+        }
+      } catch (e) {
+        console.warn("[Chat RAG] Wikipedia fetch failed, using frontend context only.");
+      }
+    }
+
+    // 🔹 3. Get AI response from TinyLlama Backend
+    let fullUrl = process.env.FASTAPI_URL || "http://localhost:8000/search";
+    const baseUrl = fullUrl.trim().replace(/\/(search|predict|embed)?\/?$/, '');
+    
+    let botReply = "I'm sorry, I'm having trouble reaching my knowledge base right now.";
+    
+    try {
+      const aiResponse = await axios.post(`${baseUrl}/chat`, { 
+        message, 
+        context: ragContext.substring(0, 4000) // Increased for better accuracy
+      }, { timeout: 60000 });
+      botReply = aiResponse.data.response;
+    } catch (aiErr) {
+      console.error("[Chat Error] AI Backend unreachable:", aiErr.message);
+    }
+
+    // 🔹 4. Save both messages to DB (Persistent History)
+    if (record) {
+      record.chatHistory.push({ role: "user", content: message });
+      record.chatHistory.push({ role: "bot", content: botReply });
+      await record.save();
+    }
+
+    res.json({ response: botReply });
+  } catch (error) {
+    console.error("[Chat Error] Proxy failed:", error.message);
+    res.status(500).json({ error: "Failed to process chat" });
   }
 });
 

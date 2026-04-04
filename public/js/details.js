@@ -79,12 +79,15 @@ async function playTTS(text, btn) {
     alert("Audio failed. There was some unknown issue.");
   }
 }
+window.playTTS = playTTS;
 
 function resetBtn(btn) {
   if (!btn) return;
   btn.classList.remove('playing');
   if (btn.classList.contains('master-tts')) {
     btn.innerHTML = '<i class="fa-solid fa-play"></i> Listen All';
+  } else if (btn.id === 'chat-listen') {
+    btn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
   } else {
     btn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
   }
@@ -189,4 +192,123 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  // --- Chatbot Logic ---
+  const chatbotToggle = document.getElementById('chatbot-toggle');
+  const chatbotWindow = document.getElementById('chatbot-window');
+  const closeChat = document.getElementById('close-chat');
+  const chatInput = document.getElementById('chat-input');
+  const chatSend = document.getElementById('chat-send');
+  const chatMessages = document.getElementById('chat-messages');
+  const chatListen = document.getElementById('chat-listen');
+
+  const landmarkId = chatbotWindow?.dataset.id;
+  const initialHistory = JSON.parse(chatbotWindow?.dataset.history || "[]");
+
+  let lastBotReply = "";
+
+  const toggleChat = () => {
+    chatbotWindow.classList.toggle('active');
+  };
+
+  const appendMessage = (text, sender) => {
+    if (!text) return;
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message ${sender}-message`;
+    
+    if (sender === 'bot') {
+      msgDiv.innerHTML = `
+        <div class="message-content">${text}</div>
+        <button class="message-tts-btn" title="Listen" onclick="playTTS(\`${text.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`, this)">
+          <i class="fa-solid fa-volume-high"></i>
+        </button>
+      `;
+      lastBotReply = text;
+    } else {
+      msgDiv.textContent = text;
+    }
+    
+    chatMessages.appendChild(msgDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  };
+
+  // 🔹 Render Initial History from DB
+  if (initialHistory && initialHistory.length > 0) {
+    chatMessages.innerHTML = ""; // Clear default welcome
+    initialHistory.forEach(msg => appendMessage(msg.content, msg.role));
+  }
+
+  const gatherContext = () => {
+    let context = "";
+    // 1. Get Overview
+    const overview = document.getElementById('description-text');
+    if (overview) context += "Overview: " + overview.innerText + "\n\n";
+
+    // 2. Get Loaded Sections
+    const sections = document.querySelectorAll('.accordion-item .content-body');
+    sections.forEach(sec => {
+      const title = sec.closest('.accordion-item').querySelector('.section-title').innerText;
+      const text = sec.innerText.trim();
+      if (text && !text.includes("Loading")) {
+        context += title + ": " + text + "\n\n";
+      }
+    });
+    return context.trim();
+  };
+
+  const handleChatSend = async () => {
+    const message = chatInput.value.trim();
+    if (!message) return;
+
+    appendMessage(message, 'user');
+    chatInput.value = '';
+
+    // Show "thinking" indicator
+    const thinkingDiv = document.createElement('div');
+    thinkingDiv.className = 'message bot-message thinking';
+    thinkingDiv.textContent = '...';
+    chatMessages.appendChild(thinkingDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    const context = gatherContext();
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: landmarkId, message, context })
+      });
+      const data = await response.json();
+      thinkingDiv.remove();
+      
+      if (data.response) {
+        appendMessage(data.response, 'bot');
+      } else {
+        appendMessage("I'm sorry, I'm having trouble processing that right now.", 'bot');
+      }
+    } catch (err) {
+      thinkingDiv.remove();
+      appendMessage("Connection error. Ensure your AI service is online.", 'bot');
+    }
+  };
+
+  if (chatbotToggle) chatbotToggle.addEventListener('click', toggleChat);
+  if (closeChat) closeChat.addEventListener('click', toggleChat);
+
+  if (chatSend) {
+    chatSend.addEventListener('click', handleChatSend);
+  }
+
+  if (chatInput) {
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleChatSend();
+    });
+  }
+
+  if (chatListen) {
+    chatListen.addEventListener('click', () => {
+      if (!lastBotReply) return;
+      playTTS(lastBotReply, chatListen);
+    });
+  }
 });

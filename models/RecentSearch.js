@@ -8,6 +8,13 @@ const recentSearchSchema = new mongoose.Schema({
   imageUrl: { type: String, default: "" },
   description: { type: String, default: "" },
   score: { type: Number, default: null },
+  chatHistory: [
+    {
+      role: { type: String, enum: ["user", "bot"] },
+      content: { type: String },
+      timestamp: { type: Date, default: Date.now },
+    }
+  ],
   createdAt: { type: Date, default: Date.now },
 });
 

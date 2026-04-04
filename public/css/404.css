@@ -1,7 +1,9 @@
 body {
   font-family: Arial, sans-serif;
   text-align: center;
-  margin-top: 80px;
+}
+.auth-container{
+  margin: 80px 40px;
 }
 
 h1 {

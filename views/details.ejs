@@ -58,6 +58,7 @@
 
       <div class="details-actions">
         <form action="/user/bookmark" method="POST" class="bookmark-form">
+          <input type="hidden" name="originalId" value="<%= id %>">
           <input type="hidden" name="landmarkName" value="<%= landmarkName %>">
           <input type="hidden" name="imageUrl" value="<%= imageUrl %>">
           <input type="hidden" name="wikiLink" value="<%= wikipediaLink %>">
@@ -72,6 +73,37 @@
       </div>
     </div>
   </main>
+
+
+  <!-- Floating Chatbot Toggle -->
+  <button id="chatbot-toggle" class="chatbot-toggle" title="Ask Landmark AI">
+    <i class="fa-solid fa-robot"></i>
+  </button>
+
+  <!-- Chatbot Window -->
+  <div id="chatbot-window" class="chatbot-window" data-id="<%= id %>" data-history="<%= JSON.stringify(chatHistory) %>">
+    <div class="chatbot-header">
+      <div class="header-info">
+        <i class="fa-solid fa-robot"></i>
+        <span>Landmark AI Guide</span>
+      </div>
+      <button id="close-chat" class="close-chat"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="chat-messages" class="chat-messages">
+      <div class="message bot-message">
+        <div class="message-content">Hello! I'm your AI guide. Ask me anything about <%= landmarkName %>!</div>
+        <button class="message-tts-btn" title="Listen" onclick="playTTS(this.previousElementSibling.innerText, this)">
+          <i class="fa-solid fa-volume-high"></i>
+        </button>
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <input type="text" id="chat-input" placeholder="Type your question..." autocomplete="off">
+      <button id="chat-send" class="chat-icon-btn" title="Send message">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
 
   <script src="/js/details.js"></script>
 

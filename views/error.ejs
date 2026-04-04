@@ -2,9 +2,10 @@
 <html>
 <%- include('partials/head', { title: 'Error', css: 'error' }) %>
 <body>
-  <%- include('partials/header', { title: 'Error' }) %>
+  <%- include('partials/header', { title: 'Travellens' }) %>
   <div class="auth-container">
     <div class="auth-card">
+      <h2>Error</h2>
       <h1 class="title" style="color: #e74c3c;">Something went wrong</h1>
       <p class="tagline" style="margin-top: 10px;"><%= message || "Unexpected server error." %></p>
       <a href="/home" class="switch-btn" style="display: inline-block; margin-top: 20px;">Return Home</a>

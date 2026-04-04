@@ -81,7 +81,7 @@ router.post("/recent", isLoggedIn, async (req, res) => {
 /* Add Bookmark (no duplicates, updates timestamp) */
 router.post("/bookmark", isLoggedIn, async (req, res) => {
   try {
-    const { landmarkName, imageUrl, location, wikiLink, description } = req.body || {};
+    const { landmarkName, imageUrl, location, wikiLink, description, originalId } = req.body || {};
     if (!landmarkName) return res.status(400).send("Missing landmarkName");
 
     const normalized = landmarkName.trim().toLowerCase();
@@ -106,6 +106,14 @@ router.post("/bookmark", isLoggedIn, async (req, res) => {
       wikiLink,
       description,
     });
+
+    // 🔹 Copy Chat History from RecentSearch if available
+    if (originalId) {
+      const rs = await RecentSearch.findById(originalId);
+      if (rs && rs.chatHistory && rs.chatHistory.length > 0) {
+        bookmark.chatHistory = rs.chatHistory;
+      }
+    }
 
     const saved = await bookmark.save();
     await User.findByIdAndUpdate(userId, { $push: { bookmarks: saved._id } });
