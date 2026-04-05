@@ -332,7 +332,7 @@
 /* --- Chatbot Styling --- */
 .chatbot-toggle {
   position: fixed;
-  bottom: 80px; /* 🔹 Lifted up to avoid footer */
+  bottom: 80px; /* Lifted up to avoid footer */
   right: 30px;
   width: 60px;
   height: 60px;
@@ -357,7 +357,7 @@
 
 .chatbot-window {
   position: fixed;
-  bottom: 150px; /* 🔹 Lifted up to match toggle */
+  bottom: 150px; /* Lifted up to match toggle */
   right: 30px;
   width: 350px;
   max-width: 90vw;

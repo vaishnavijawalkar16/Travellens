@@ -31,7 +31,7 @@ router.get("/details/:id", isLoggedIn, async (req, res) => {
       detailedWikiLink = `https://en.wikipedia.org/wiki/${encodeURIComponent(wikiTitle)}`;
     }
 
-    // 🔹 Try to fetch sections from Wikipedia if title exists
+    // Try to fetch sections from Wikipedia if title exists
     if (wikiTitle && landmarkName !== "Unknown") {
       try {
         const wikiApiUrl = `https://en.wikipedia.org/w/api.php?action=parse&page=${wikiTitle}&prop=sections&format=json&origin=*&redirects=1`;
@@ -106,13 +106,13 @@ router.post("/api/chat", isLoggedIn, async (req, res) => {
     const { id, message, context } = req.body;
     if (!id || !message) return res.status(400).json({ error: "ID and message required" });
 
-    // 🔹 1. Fetch comprehensive landmark info from DB
+    // 1. Fetch comprehensive landmark info from DB
     let record = await RecentSearch.findById(id);
     if (!record) record = await Bookmark.findById(id);
 
     let ragContext = context || "";
 
-    // 🔹 2. Enhance Context from Wikipedia if needed
+    // 2. Enhance Context from Wikipedia if needed
     if (record && record.wikiLink && record.wikiLink.includes("/wiki/")) {
       try {
         const wikiTitle = record.wikiLink.split("/wiki/")[1];
@@ -131,8 +131,8 @@ router.post("/api/chat", isLoggedIn, async (req, res) => {
       }
     }
 
-    // 🔹 3. Get AI response from TinyLlama Backend
-    let fullUrl = process.env.FASTAPI_URL || "http://localhost:8000/search";
+    // 3. Get AI response from Groq Backend
+    let fullUrl = process.env.AI_SERVICE_URL || "http://localhost:8000/search";
     const baseUrl = fullUrl.trim().replace(/\/(search|predict|embed)?\/?$/, '');
     
     let botReply = "I'm sorry, I'm having trouble reaching my knowledge base right now.";
@@ -144,10 +144,10 @@ router.post("/api/chat", isLoggedIn, async (req, res) => {
       }, { timeout: 60000 });
       botReply = aiResponse.data.response;
     } catch (aiErr) {
-      console.error("[Chat Error] AI Backend unreachable:", aiErr.message);
+      console.error("[Chat Error] AWS AI Backend unreachable:", aiErr.message);
     }
 
-    // 🔹 4. Save both messages to DB (Persistent History)
+    // 4. Save both messages to DB (Persistent History)
     if (record) {
       record.chatHistory.push({ role: "user", content: message });
       record.chatHistory.push({ role: "bot", content: botReply });
@@ -169,8 +169,8 @@ router.post("/api/tts", async (req, res) => {
     const { text } = req.body;
     if (!text) return res.status(400).json({ error: "Text is required" });
 
-    // 🔹 Detect base URL from FASTAPI_URL or CLIP_API_URL or fallback
-    let fullUrl = process.env.FASTAPI_URL || "http://localhost:8000/search";
+    // Detect base URL from AI_SERVICE_URL or fallback
+    let fullUrl = process.env.AI_SERVICE_URL || "http://localhost:8000/search";
     
     // Safety check: if fullUrl was just added to .env without quotes or contains spaces
     fullUrl = fullUrl.trim();
@@ -190,11 +190,11 @@ router.post("/api/tts", async (req, res) => {
     res.send(response.data);
   } catch (error) {
     if (error.response && error.response.status === 404) {
-      console.error("[TTS Error] AI Service returned 404. Did you add the /tts route to Colab?");
-      res.status(404).json({ error: "AI Service 404: TTS function not found in your cloud service." });
+      console.error("[TTS Error] AI Service returned 404. Ensure your AWS ai_service.py has the /tts route.");
+      res.status(404).json({ error: "AI Service 404: TTS function not found in your AWS service." });
     } else if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
-      console.error("[TTS Error] Could not connect to AI Service. Check your FASTAPI_URL.");
-      res.status(503).json({ error: "AI Service Offline: Ensure your Colab tunnel is active." });
+      console.error("[TTS Error] Could not connect to AWS AI Service. Check your FASTAPI_URL.");
+      res.status(503).json({ error: "AI Service Offline: Ensure your AWS instance is running." });
     } else {
       console.error("[TTS Error] Proxy failed:", error.message);
       res.status(500).json({ error: "Failed to generate speech", details: error.message });

@@ -5,7 +5,7 @@ const FormData = require("form-data");
 const RecentSearch = require("../models/RecentSearch");
 const User = require("../models/User");
 
-const FASTAPI_URL = process.env.FASTAPI_URL || "http://localhost:8000/search";
+const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://localhost:8000/search";
 
 /* Middleware */
 function isLoggedIn(req, res, next) {
@@ -27,19 +27,19 @@ router.post("/image", isLoggedIn, async (req, res) => {
       contentType: imageFile.mimetype || "image/jpeg",
     });
 
-    // Send image to FastAPI for recognition
-    const fastRes = await axios.post(FASTAPI_URL, form, {
+    // Send image to AWS AI for recognition
+    const fastRes = await axios.post(AI_SERVICE_URL, form, {
       headers: { ...form.getHeaders() },
-      timeout: 20000,
+      timeout: 60000, // Increased to 60s for slow first-run inference on t2.micro
     });
 
     const landmark = fastRes.data || {};
     const landmarkName = (landmark.landmarkName || landmark.name || "").trim();
     const wikiLink = (landmark.wikiLink || landmark.wikipedialink || "").trim();
 
-    // 🔹 Validation: Ensure we actually found a landmark
-    if (!landmarkName || landmarkName === "") {
-      console.warn("AI Recognition failed to identify a specific landmark.");
+    // Validation: Ensure we actually found a landmark
+    if (!landmarkName || landmarkName === "" || landmarkName.toLowerCase() === "unknown") {
+      console.warn(`[Search] AI Service could not recognize this image (Score: ${landmark.score || 'N/A'})`);
       return res.status(404).render("404", { 
         title: "Landmark Not Recognized",
         message: "We couldn't identify a specific landmark in this image. Please try a clearer photo!" 
@@ -51,7 +51,7 @@ router.post("/image", isLoggedIn, async (req, res) => {
     let description = "No description available.";
     let location = "Unknown location";
 
-    // 🔹 Fetch Wikipedia info if available
+    // Fetch Wikipedia info if available
     if (wikiLink && wikiLink.includes("wikipedia.org/wiki/")) {
       try {
         const pageTitle = encodeURIComponent(wikiLink.split("/wiki/")[1]);
@@ -121,15 +121,16 @@ router.post("/image", isLoggedIn, async (req, res) => {
     console.log(`Added new recent search: ${landmarkName}`);
     return res.redirect(`/details/${newSearch._id}`);
   } catch (err) {
-    if (err.response && err.response.status === 404) {
-      console.error("[Search Error] AI Service (Ngrok) is OFFLINE or URL has changed. Update your FASTAPI_URL in .env");
+    if (err.response) {
+      console.error(`[Search Error] AI Service returned error ${err.response.status}:`, err.response.data);
     } else if (err.code === 'ECONNABORTED') {
-      console.error("[Search Error] AI Service timed out. The model might be loading slowly on Colab.");
+      console.error("[Search Error] AI Service timed out. The first run on AWS can be slow (Wait 30s-60s).");
     } else {
-      console.error("Search error:", err.message || err);
+      console.error("[Search Error] Could not connect to AWS AI Service. Check your FASTAPI_URL.");
+      console.error("Details:", err.message);
     }
     return res.status(503).render("error", { 
-      message: "AI Search Service is currently offline. Please check the backend connection." 
+      message: "AI Search Service is currently busy or offline. Please try again in 1 minute." 
     });
   }
 });

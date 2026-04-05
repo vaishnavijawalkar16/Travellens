@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+python-multipart
+pandas
+python-dotenv
+pillow
+requests
+scikit-learn
+edge-tts
+groq
+torch
+torchvision
+git+https://github.com/openai/CLIP.git

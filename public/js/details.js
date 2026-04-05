@@ -103,7 +103,7 @@ window.playAllSections = async function(masterBtn) {
   }
 
   playlist = [];
-  // 🔹 Starting from sections only, excluding Overview
+  // Starting from sections only, excluding Overview
   const sections = document.querySelectorAll('.accordion-item');
   sections.forEach(item => {
     const body = item.querySelector('.content-body');
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chatMessages.scrollTop = chatMessages.scrollHeight;
   };
 
-  // 🔹 Render Initial History from DB
+  // Render Initial History from DB
   if (initialHistory && initialHistory.length > 0) {
     chatMessages.innerHTML = ""; // Clear default welcome
     initialHistory.forEach(msg => appendMessage(msg.content, msg.role));

@@ -107,7 +107,7 @@ router.post("/bookmark", isLoggedIn, async (req, res) => {
       description,
     });
 
-    // 🔹 Copy Chat History from RecentSearch if available
+    // Copy Chat History from RecentSearch if available
     if (originalId) {
       const rs = await RecentSearch.findById(originalId);
       if (rs && rs.chatHistory && rs.chatHistory.length > 0) {
@@ -133,7 +133,7 @@ router.get("/bookmarks", isLoggedIn, async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    // 🔹 Remove duplicates by landmarkName
+    // Remove duplicates by landmarkName
     const seen = new Set();
     bookmarks = bookmarks.filter((b) => {
       const key = b.landmarkName.toLowerCase();

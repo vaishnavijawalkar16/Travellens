@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const fileUpload = require("express-fileupload");
+const axios = require("axios");
 
 const authRoutes = require("./routes/auth");
 const searchRoutes = require("./routes/search");
@@ -125,4 +126,22 @@ app.use((err, req, res, next) => {
   res.status(500).render("error", { message: "Something went wrong" });
 });
 
-app.listen(PORT, () => console.log(` Server listening on http://localhost:${PORT}`));
+app.listen(PORT, async () => {
+  console.log(`------Server listening on http://localhost:${PORT}-----`);
+  
+  // AI Heartbeat Check
+  const aiUrl = process.env.AI_SERVICE_URL || "http://localhost:8000/search";
+  const baseUrl = aiUrl.trim().replace(/\/(search|predict|embed)?\/?$/, '');
+  
+  try {
+    console.log(`Checking AI Service connectivity... (${baseUrl})`);
+    const response = await axios.get(baseUrl, { timeout: 5000 });
+    if (response.status === 200) {
+      console.log("---------AWS AI Service is ONLINE and reachable!---------");
+    }
+  } catch (err) {
+    console.error("---------AWS AI Service is OFFLINE or UNREACHABLE.");
+    console.error("   Reason:", err.message);
+    console.warn("   Check your AWS Security Group (Port 8000) and FASTAPI_URL in .env");
+  }
+});
