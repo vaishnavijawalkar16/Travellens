@@ -228,4 +228,4 @@ Your TravelLens Web Application is now fully synchronized with your own AWS-host
 ---
 
 ### 📄 License
-This project is licensed under the ISC License. Developed with ❤️ by Vaishnavi.
+Developed with ❤️ by Vaishnavi.
