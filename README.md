@@ -156,6 +156,8 @@ We tested every feature manually to ensure maximum software reliability:
    AI_SERVICE_URL=http://your-aws-ec2-ip:8000/search
    GROQ_API_KEY=your_groq_api_key
    ```
+   > [!NOTE]
+   > **Important Security & AWS Setup Info**: This project does not contain any hardcoded or pre-configured AWS host URLs as those are linked to private developer resources. **You must set up your own personal/organizational AWS account, launch an EC2 instance, and use your own public IP address in the `AI_SERVICE_URL` variable.** Follow the AWS AI Services Deployment steps below to provision your own system.
 4. **Run the App**:
    ```bash
    npm run dev
@@ -207,10 +209,14 @@ pm2 startup
 ```
 
 ### Step 6: Connect Express App
-Ensure your Node server's `.env` configuration has the correct EC2 endpoint pointing to the FastAPI service:
+Ensure your Node server's `.env` configuration has the correct EC2 endpoint pointing to your own personal FastAPI service:
 ```env
 AI_SERVICE_URL=http://your-aws-ec2-public-ip:8000/search
 ```
+
+> [!WARNING]
+> **Use Your Own AWS Server Endpoint Only**: Do not use or attempt to query external AWS endpoints. As these cloud instances are run on private, personal AWS accounts, they are strictly restricted and will fail to respond. You must complete steps 1–5 on your own personal AWS account, configure your own security groups, and populate `AI_SERVICE_URL` with your own machine's IP.
+
 Restart your Node server. The console should display a heartbeat success log:
 ```text
 Checking AI Service connectivity... (http://your-aws-ec2-public-ip:8000)
